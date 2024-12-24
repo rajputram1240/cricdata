@@ -114,7 +114,7 @@ app.post('/scrape', async (req, res) => {
       fs.writeFileSync(filePath, JSON.stringify(allScorecards, null, 2));
 
       console.log(`Scorecards saved to ${filePath}`);
-      res.json({ success: true, filename: filePath });
+      res.json({ success: true, filename: filename });
     }
   } catch (error) {
     console.error('Error scraping scorecards:', error.message);
