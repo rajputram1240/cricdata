@@ -1,18 +1,82 @@
 const express = require('express');
 const puppeteer = require('puppeteer');
 const Scorecard = require('./scorecard');
+const Team = require('./team');  // Import Team model
+require('dotenv').config();
+const mongoose = require('mongoose');
 
 const app = express();
 app.use(express.json());
 app.use(express.static('public')); // Serve static files like index.html
 
-const mongoose = require('mongoose');
-
-mongoose.connect('mongodb://localhost:27017/cricdata', { useNewUrlParser: true, useUnifiedTopology: true })
+// Connect to MongoDB
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to cricdata database'))
   .catch(err => console.error('Failed to connect to MongoDB', err));
 
+// Helper function to launch puppeteer and scrape data
+const scrapeMatchData = async (url) => {
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
+  const page = await browser.newPage();
+  await page.goto(url, { waitUntil: 'domcontentloaded' });
 
+  const matchId = url.split('/').pop();
+
+  const allScorecards = await page.evaluate(async () => {
+    const tables = document.querySelectorAll('.statistic-table');
+    const heading = document.querySelector('.large-heading');
+    
+    if (!heading) throw new Error("Heading not found!");
+
+    let team1 = heading.querySelector('span:first-child')?.textContent.trim() || "Unknown";
+    const team1Abbr = heading.querySelector('span:first-child > .abbr-tag > span')?.textContent.trim() || "UNK";
+    let team2 = heading.querySelector('span:nth-child(3)')?.textContent.trim() || "Unknown";
+    const team2Abbr = heading.querySelector('span:nth-child(3) > .abbr-tag > span')?.textContent.trim() || "UNK";
+
+    team1 = team1.split(' ').filter(word => word.toLowerCase() !== team1Abbr.toLowerCase()).join(' ');
+    team2 = team2.split(' ').filter(word => word.toLowerCase() !== team2Abbr.toLowerCase()).join(' ');
+
+    const matchInfoText = heading.querySelector('.comp-sub-title')?.textContent.trim() || "Unknown";
+    const [matchDate, league, venue] = matchInfoText.split("—")[1]?.trim().split("•") || ["Unknown Date", "Unknown League", "Unknown Venue"];
+
+    const allData = await Promise.all(
+      Array.from(tables).map(async (table, index) => {
+        const header = [];
+        const tableData = [];
+        let remark = "Bowling";
+
+        table.querySelectorAll('thead tr').forEach(row => {
+          row.querySelectorAll('th').forEach(col => {
+            header.push(col?.textContent.trim());
+            if (col?.textContent.trim() === "Batsman") remark = "Batting";
+          });
+        });
+
+        table.querySelectorAll('tbody tr').forEach(row => {
+          const columns = row.querySelectorAll('td');
+          if (columns.length >= 3) {
+            const temp = {};
+            columns.forEach((col, colIndex) => temp[header[colIndex]] = col.textContent.trim());
+            tableData.push(temp);
+          }
+        });
+
+        const innings = (index === 0 || index === 2) ? "1st innings" : "2nd innings";
+        return { innings: `${innings} ${remark}`, data: tableData };
+      })
+    );
+
+    return { matchId, matchInfo: { team1, team1Abbr, team2, team2Abbr, matchDate, league, venue }, scoreCard: allData.filter(item => item.data.length > 0) };
+  });
+
+  await browser.close();
+  return allScorecards;
+};
+
+// Insert Scorecard Endpoint
 app.post('/insertScorecard', async (req, res) => {
   const { url } = req.body;
 
@@ -20,155 +84,109 @@ app.post('/insertScorecard', async (req, res) => {
     return res.status(400).json({ success: false, error: 'No URL provided.' });
   }
 
-  const browser = await puppeteer.launch({ headless: true });
-  const page = await browser.newPage();
-
   try {
-    // Navigate to the webpage
-    await page.goto(url, { waitUntil: 'networkidle2' });
+    const allScorecards = await scrapeMatchData(url);
 
-    // Wait for the necessary elements to load
-    await page.waitForSelector('.statistic-table', { timeout: 10000 });
-    await page.waitForSelector('.large-heading', { timeout: 10000 });
+    await Scorecard.updateOne({ matchId: allScorecards.matchId }, allScorecards, { upsert: true });
 
-    // Extract data
-    const allScorecards = await page.evaluate(() => {
-      const tables = document.querySelectorAll('.statistic-table');
-      const allData = [];
-      let titleIndex = 0;
-
-      // Extract match information
-      const heading = document.querySelector('.large-heading');
-      if (!heading) throw new Error("Heading not found!");
-
-      let team1 = heading.querySelector('span:first-child')?.textContent.trim() || "Unknown";
-      
-      const team1Abbr = heading.querySelector('span:first-child > .abbr-tag > span')?.textContent.trim() || "UNK";
-      let team2 = heading.querySelector('span:nth-child(3)')?.textContent.trim() || "Unknown";
-      
-      const team2Abbr = heading.querySelector('span:nth-child(3) > .abbr-tag > span')?.textContent.trim() || "UNK";
-      team1 = team1
-      .split(' ')
-      .filter(word => word.toLowerCase() !== team1Abbr.toLowerCase())
-      .join(' ');
-      team2 = team2
-      .split(' ')
-      .filter(word => word.toLowerCase() !== team2Abbr.toLowerCase())
-      .join(' ');
-      const matchInfoText = heading.querySelector('.comp-sub-title')?.textContent.trim() || "Unknown";
-      const matchInfoSplit = matchInfoText.split("—");
-      const matchDate = matchInfoSplit[1]?.trim() || "Unknown Date";
-      const matchInfoSplit2 = matchInfoSplit[0]?.split("•") || ["Unknown League", "Unknown Venue"];
-      const league = matchInfoSplit2[0]?.trim() || "Unknown League";
-      const venue = matchInfoSplit2[1]?.trim() || "Unknown Venue";
-
-      // Loop through each table to extract data
-      tables.forEach((table, index) => {
-        const head = table.querySelectorAll('thead tr');
-        const rows = table.querySelectorAll('tbody tr');
-        const header = [];
-        const tableData = [];
-        let remark = "Bowling";
-        titleIndex++;
-
-        // Extract header row
-        head.forEach(row => {
-          const columns = row.querySelectorAll('th');
-          if (columns.length < 3) return;
-          columns.forEach(col => {
-            header.push(col?.textContent.trim());
-            if (col?.textContent.trim() === "Batsman") {
-              remark = "Batting";
-            }
-          });
-        });
-
-        // Extract row data
-        rows.forEach(row => {
-          const columns = row.querySelectorAll('td');
-          if (columns.length < 3) return;
-          const temp = {};
-          columns.forEach((col, colIndex) => {
-            temp[header[colIndex]] = col.textContent.trim();
-          });
-          tableData.push(temp);
-        });
-
-        const innings = (titleIndex === 1 || titleIndex === 3) ? "1st innings" : "2nd innings";
-        const inningsType = `${innings} ${remark}`;
-
-        allData.push({
-          innings: inningsType,
-          data: tableData,
-        });
-      });
-
-      return {
-        matchInfo: { team1, team1Abbr, team2, team2Abbr, matchDate, league, venue },
-        scoreCard: allData.filter(item => item.data.length > 0),
-      };
-    });
-    
-    let checkScorecard = await Scorecard.findOne({ 'matchInfo': allScorecards.matchInfo });
-
-    if(checkScorecard){
-      res.status(500).json({ success: false, error: 'File already saved.' });
-    } else {
-      await Scorecard.create(allScorecards);
-      res.json({ success: true, message: 'File saved successfully.' });
-    }
+    res.json({ success: true, message: 'Match data saved successfully.' });
   } catch (error) {
     console.error('Error scraping scorecards:', error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Scrape and store international teams in the database
+app.post('/scrapeTeams', async (req, res) => {
+  const { url } = req.body;
+
+  if (!url) {
+    return res.status(400).json({ success: false, error: 'No URL provided.' });
+  }
+
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
+  const page = await browser.newPage();
+  await page.goto(url, { waitUntil: 'domcontentloaded' });
+
+  try {
+    // Scrape the team names from the page
+    const teams = await page.evaluate(() => {
+      const teamElements = document.querySelectorAll('.statistic-table tbody tr'); // Update the selector as per the page structure
+      const typeteam = document.querySelector('.comp-sub-title strong').textContent.trim();
+      const teamNames = [];
+
+      teamElements.forEach(row => {
+        const firstColumn = row.querySelector('td'); // Get the first <td> of the row
+        if (firstColumn) {
+          teamNames.push({ name: firstColumn.textContent.trim(), type: typeteam });
+        }
+      });
+      return teamNames;
+    });
+
+    if (teams.length > 0) {
+      const results = [];
+      
+      // Iterate over teams and insert only if not already in database
+      for (const team of teams) {
+        const existingTeam = await Team.findOne({ where: { name: team.name, type: team.type } });
+        
+        if (!existingTeam) {
+          const newTeam = await Team.create(team);
+          results.push(newTeam);
+        }
+      }
+
+      res.json({
+        success: true,
+        message: 'Teams processed successfully',
+        stored: results.length,
+        skipped: teams.length - results.length,
+        teams: results
+      });
+    } else {
+      res.status(404).json({ success: false, message: 'No teams found on the page' });
+    }
+  } catch (error) {
+    console.error('Error scraping teams:', error.message);
     res.status(500).json({ success: false, error: error.message });
   } finally {
     await browser.close();
   }
 });
 
-app.get('/getAllLeagueTeam', async (req,res)=>{
-   const { league } = req.query;
 
-   if (!league) {
+// Get All League Teams Endpoint
+app.get('/getAllLeagueTeam', async (req, res) => {
+  const { league } = req.query;
+
+  if (!league) {
     return res.status(400).json({ success: false, error: 'Please select league name.' });
   }
 
-  await Scorecard.aggregate([
-    {
-      $match: {
-        'matchInfo.league': { $regex: league, $options: 'i' } // Match league name
-      }
-    },
-    {
-      $group: {
-        _id: null,
-        team1Set: { $addToSet: '$matchInfo.team1' },
-        team2Set: { $addToSet: '$matchInfo.team2' }
-      }
-    },
-    {
-      $project: {
-        uniqueTeams: { $setUnion: ['$team1Set', '$team2Set'] } // Merge unique team arrays
-      }
-    }
-  ])
-  .then(result => {
-    if (result.length > 0) {
-      console.log('Unique Teams:', result[0].uniqueTeams);
-      return res.json(result[0].uniqueTeams);
+  try {
+    const result = await Team.find({ "type": league }).select('name -_id');
+    
+    // Extract names into an array
+    const resultSet = result.map(team => team.name);
+
+    if (resultSet.length > 0) {
+      res.json(resultSet);
     } else {
-      console.log('No matches found.');
-      return res.status(400).json({ success: false, error: 'No matches found.' });
+      res.status(400).json({ success: false, error: 'No matches found.' });
     }
-  })
-  .catch(error => {
+  } catch (error) {
     console.error('Error:', error);
-    return res.status(400).json({ success: false, error: error });
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
 
-  });  
-})
-
-app.get('/head2head',async (req,res)=>{
-  const { team1,team2 } = req.query;
+// Head-to-Head Matches Endpoint
+app.get('/head2head', async (req, res) => {
+  const { team1, team2 } = req.query;
 
   if (!team1 || !team2) {
     return res.status(400).json({ success: false, error: 'Please select team' });
@@ -179,31 +197,38 @@ app.get('/head2head',async (req,res)=>{
       $or: [
         { "matchInfo.team1": team1, "matchInfo.team2": team2 },
         { "matchInfo.team1": team2, "matchInfo.team2": team1 },
-      ],
+      ]
     });
-    
-    console.log("Matches found:", matches);
-    return res.json(matches);
+
+    res.json(matches);
   } catch (error) {
-    return res.status(400).json({ success: false, error: error });
+    res.status(400).json({ success: false, error: error.message });
   }
+});
 
-})
-
-app.get('/venue',async (req,res)=>{
-
+// Get Unique league Endpoint
+app.get('/league', async (req, res) => {
   try {
-    // Use the distinct method to get unique venues
-    const venues = await Scorecard.distinct("matchInfo.venue");
-    return res.json(venues);
+    const league = await Team.distinct("type");
+    res.json(league);
   } catch (error) {
-    return res.status(400).json({ success: false, error: error });
+    res.status(400).json({ success: false, error: error.message });
   }
+});
 
-})
+// Get Unique Venues Endpoint
+app.get('/venue', async (req, res) => {
+  try {
+    const venues = await Scorecard.distinct("matchInfo.venue");
+    res.json(venues);
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
 
-app.get('/matchByVenue', async(req,res)=>{
-  let { venue } = req.query;
+// Get Matches By Venue Endpoint
+app.get('/matchByVenue', async (req, res) => {
+  const { venue } = req.query;
 
   if (!venue) {
     return res.status(400).json({ success: false, error: 'Please select venue' });
@@ -211,36 +236,33 @@ app.get('/matchByVenue', async(req,res)=>{
 
   try {
     const matches = await Scorecard.find({ "matchInfo.venue": venue });
-    return res.json(matches);
+    res.json(matches);
   } catch (error) {
-    return res.status(400).json({ success: false, error: error });
+    res.status(400).json({ success: false, error: error.message });
   }
+});
 
-})
-
-// Endpoint to get match details by matchId
+// Get Match Details by matchId Endpoint
 app.get('/matchDetails', async (req, res) => {
   const matchId = req.query.matchId;
+
   if (!matchId) {
     return res.status(400).json({ error: 'Match ID is required' });
   }
 
   try {
-    // Find the match by ID
     const match = await Scorecard.findById(matchId);
     if (!match) {
       return res.status(404).json({ error: 'Match not found' });
     }
-
-    // Return match details
     res.json(match);
   } catch (error) {
     console.error('Error fetching match details:', error);
     res.status(500).json({ error: 'An error occurred while fetching match details' });
   }
-})
+});
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });

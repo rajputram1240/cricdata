@@ -47,6 +47,7 @@ const ScoreCardSchema = new Schema({
 
 // Main schema for the match document
 const MatchSchema = new Schema({
+  matchId: { type: Number, require: true},
   matchInfo: MatchInfoSchema,
   scoreCard: [ScoreCardSchema]
 });

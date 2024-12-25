@@ -130,8 +130,7 @@
       <label for="league" class="form-label">Select League:</label>
       <select id="league" class="form-select">
         <option value="">Select League</option>
-        <option value="Big Bash League">Big Bash League</option>
-        <!-- Add more leagues as needed -->
+        
       </select>
     </div>
 
@@ -169,9 +168,121 @@
   <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
   
-  <!-- Existing Script -->
   <script>
-    // Your existing JavaScript code here
+    const leagueSelect = document.getElementById('league');
+    const team1Select = document.getElementById('team1');
+    const team2Select = document.getElementById('team2');
+    const matchesDiv = document.getElementById('matches');
+  
+    // Fetch leagues on page load and populate the league select box
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const response = await fetch('/league');
+        const leagues = await response.json();
+  
+        if (Array.isArray(leagues) && leagues.length > 0) {
+          // Populate league dropdown
+          leagueSelect.innerHTML = '<option value="">Select League</option>';
+          leagues.forEach(league => {
+            leagueSelect.innerHTML += `<option value="${league}">${league}</option>`;
+          });
+        } else {
+          console.error('No leagues found.');
+          alert('No leagues available at the moment.');
+        }
+      } catch (error) {
+        console.error('Error fetching leagues:', error);
+        alert('An error occurred while fetching leagues.');
+      }
+    });
+  
+    // Function to get matches from the backend
+    async function getMatches() {
+      const league = leagueSelect.value;
+      const team1 = team1Select.value;
+      const team2 = team2Select.value;
+  
+      if (!league || !team1 || !team2) {
+        alert('Please select a league and two teams.');
+        return;
+      }
+  
+      try {
+        const response = await fetch(`/head2head?team1=${team1}&team2=${team2}`);
+        const matches = await response.json();
+  
+        // Display the matches
+        matchesDiv.innerHTML = matches.length
+          ? matches.map(match => `
+            <div class="match-card">
+              <h5>${match.matchInfo.team1} vs ${match.matchInfo.team2}</h5>
+              <p><strong>League:</strong> ${match.matchInfo.league}</p>
+              <p><strong>Match Date:</strong> ${new Date(match.matchInfo.matchDate).toLocaleDateString()}</p>
+              <p><strong>Venue:</strong> ${match.matchInfo.venue}</p>
+              <!-- Link to scorecard page with match ID -->
+              <a class="btn btn-info" href="scorecard.html?matchId=${match._id}">View Scorecard</a>
+            </div>
+          `).join('') 
+          : 'No matches found.';
+      } catch (error) {
+        console.error('Error fetching matches:', error);
+        alert('An error occurred while fetching the matches.');
+      }
+    }
+  
+    // Function to populate teams based on selected league
+    leagueSelect.addEventListener('change', async () => {
+      const league = leagueSelect.value;
+      if (!league) return;
+  
+      try {
+        const response = await fetch(`/getAllLeagueTeam?league=${league}`);
+        const teams = await response.json();
+        
+        // Populate team 1 and team 2 dropdowns
+        updateTeamSelects(teams);
+      } catch (error) {
+        console.error('Error fetching teams:', error);
+        alert('An error occurred while fetching teams.');
+      }
+    });
+  
+    // Update team selects with the list of teams
+    function updateTeamSelects(teams) {
+      team1Select.innerHTML = '<option value="">Select Team 1</option>';
+      team2Select.innerHTML = '<option value="">Select Team 2</option>';
+  
+      teams.forEach(team => {
+        const option = `<option value="${team}">${team}</option>`;
+        team1Select.innerHTML += option;
+        team2Select.innerHTML += option;
+      });
+    }
+  
+    // Update the teams in the select boxes based on the selections
+    team1Select.addEventListener('change', function() {
+      updateTeamOptions();
+    });
+  
+    team2Select.addEventListener('change', function() {
+      updateTeamOptions();
+    });
+  
+    // Function to update the available options based on team selection
+    function updateTeamOptions() {
+      const team1Selected = team1Select.value;
+      const team2Selected = team2Select.value;
+  
+      // Remove the selected team from the other dropdown
+      team2Select.querySelectorAll('option').forEach(option => {
+        option.disabled = option.value === team1Selected || option.value === team2Selected;
+      });
+  
+      team1Select.querySelectorAll('option').forEach(option => {
+        option.disabled = option.value === team1Selected || option.value === team2Selected;
+      });
+    }
   </script>
+  
 </body>
 </html>
