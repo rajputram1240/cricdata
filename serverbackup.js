@@ -1,5 +1,7 @@
 const express = require('express');
 const puppeteer = require('puppeteer');
+const fs = require('fs');
+const path = require('path');
 const Scorecard = require('./scorecard');
 
 const app = express();
@@ -13,7 +15,7 @@ mongoose.connect('mongodb://localhost:27017/cricdata', { useNewUrlParser: true, 
   .catch(err => console.error('Failed to connect to MongoDB', err));
 
 
-app.post('/insertScorecard', async (req, res) => {
+app.post('/scrape', async (req, res) => {
   const { url } = req.body;
 
   if (!url) {
@@ -42,19 +44,11 @@ app.post('/insertScorecard', async (req, res) => {
       if (!heading) throw new Error("Heading not found!");
 
       let team1 = heading.querySelector('span:first-child')?.textContent.trim() || "Unknown";
-      
+      team1 = team1.split(" ")[0].trim();
       const team1Abbr = heading.querySelector('span:first-child > .abbr-tag > span')?.textContent.trim() || "UNK";
       let team2 = heading.querySelector('span:nth-child(3)')?.textContent.trim() || "Unknown";
-      
+      team2 = team2.split(" ")[1].trim();
       const team2Abbr = heading.querySelector('span:nth-child(3) > .abbr-tag > span')?.textContent.trim() || "UNK";
-      team1 = team1
-      .split(' ')
-      .filter(word => word.toLowerCase() !== team1Abbr.toLowerCase())
-      .join(' ');
-      team2 = team2
-      .split(' ')
-      .filter(word => word.toLowerCase() !== team2Abbr.toLowerCase())
-      .join(' ');
       const matchInfoText = heading.querySelector('.comp-sub-title')?.textContent.trim() || "Unknown";
       const matchInfoSplit = matchInfoText.split("—");
       const matchDate = matchInfoSplit[1]?.trim() || "Unknown Date";
@@ -108,14 +102,27 @@ app.post('/insertScorecard', async (req, res) => {
         scoreCard: allData.filter(item => item.data.length > 0),
       };
     });
-    
-    let checkScorecard = await Scorecard.findOne({ 'matchInfo': allScorecards.matchInfo });
 
-    if(checkScorecard){
+    // Create folder with league name if it doesn't exist
+    const leagueFolder = path.join(__dirname , allScorecards.matchInfo.league);
+    if (!fs.existsSync(leagueFolder)) {
+      fs.mkdirSync(leagueFolder, { recursive: true });  // Create the folder if it doesn't exist
+    }
+
+    // Define filename dynamically
+    const filename = `${allScorecards.matchInfo.league}_${allScorecards.matchInfo.team1}_vs_${allScorecards.matchInfo.team2}_${allScorecards.matchInfo.matchDate.replace(/\s/g, '_')}.json`;
+    const filePath = path.join(leagueFolder, filename);
+        
+    // Check if the file already exists
+    if (fs.existsSync(filePath)) {
+      console.log(`File already saved: ${filePath}`);
       res.status(500).json({ success: false, error: 'File already saved.' });
     } else {
-      await Scorecard.create(allScorecards);
-      res.json({ success: true, message: 'File saved successfully.' });
+      // Save the data to a JSON file in the league folder
+      fs.writeFileSync(filePath, JSON.stringify(allScorecards, null, 2));
+
+      console.log(`Scorecards saved to ${filePath}`);
+      res.json({ success: true, filename: filename });
     }
   } catch (error) {
     console.error('Error scraping scorecards:', error.message);
@@ -124,121 +131,6 @@ app.post('/insertScorecard', async (req, res) => {
     await browser.close();
   }
 });
-
-app.get('/getAllLeagueTeam', async (req,res)=>{
-   const { league } = req.query;
-
-   if (!league) {
-    return res.status(400).json({ success: false, error: 'Please select league name.' });
-  }
-
-  await Scorecard.aggregate([
-    {
-      $match: {
-        'matchInfo.league': { $regex: league, $options: 'i' } // Match league name
-      }
-    },
-    {
-      $group: {
-        _id: null,
-        team1Set: { $addToSet: '$matchInfo.team1' },
-        team2Set: { $addToSet: '$matchInfo.team2' }
-      }
-    },
-    {
-      $project: {
-        uniqueTeams: { $setUnion: ['$team1Set', '$team2Set'] } // Merge unique team arrays
-      }
-    }
-  ])
-  .then(result => {
-    if (result.length > 0) {
-      console.log('Unique Teams:', result[0].uniqueTeams);
-      return res.json(result[0].uniqueTeams);
-    } else {
-      console.log('No matches found.');
-      return res.status(400).json({ success: false, error: 'No matches found.' });
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    return res.status(400).json({ success: false, error: error });
-
-  });  
-})
-
-app.get('/head2head',async (req,res)=>{
-  const { team1,team2 } = req.query;
-
-  if (!team1 || !team2) {
-    return res.status(400).json({ success: false, error: 'Please select team' });
-  }
-
-  try {
-    const matches = await Scorecard.find({
-      $or: [
-        { "matchInfo.team1": team1, "matchInfo.team2": team2 },
-        { "matchInfo.team1": team2, "matchInfo.team2": team1 },
-      ],
-    });
-    
-    console.log("Matches found:", matches);
-    return res.json(matches);
-  } catch (error) {
-    return res.status(400).json({ success: false, error: error });
-  }
-
-})
-
-app.get('/venue',async (req,res)=>{
-
-  try {
-    // Use the distinct method to get unique venues
-    const venues = await Scorecard.distinct("matchInfo.venue");
-    return res.json(venues);
-  } catch (error) {
-    return res.status(400).json({ success: false, error: error });
-  }
-
-})
-
-app.get('/matchByVenue', async(req,res)=>{
-  let { venue } = req.query;
-
-  if (!venue) {
-    return res.status(400).json({ success: false, error: 'Please select venue' });
-  }
-
-  try {
-    const matches = await Scorecard.find({ "matchInfo.venue": venue });
-    return res.json(matches);
-  } catch (error) {
-    return res.status(400).json({ success: false, error: error });
-  }
-
-})
-
-// Endpoint to get match details by matchId
-app.get('/matchDetails', async (req, res) => {
-  const matchId = req.query.matchId;
-  if (!matchId) {
-    return res.status(400).json({ error: 'Match ID is required' });
-  }
-
-  try {
-    // Find the match by ID
-    const match = await Scorecard.findById(matchId);
-    if (!match) {
-      return res.status(404).json({ error: 'Match not found' });
-    }
-
-    // Return match details
-    res.json(match);
-  } catch (error) {
-    console.error('Error fetching match details:', error);
-    res.status(500).json({ error: 'An error occurred while fetching match details' });
-  }
-})
 
 const PORT = 3000;
 app.listen(PORT, () => {

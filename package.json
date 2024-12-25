@@ -13,6 +13,7 @@
     "cheerio": "^1.0.0",
     "cross-env": "^7.0.3",
     "express": "^4.21.2",
+    "mongoose": "^8.9.2",
     "puppeteer": "^23.11.1",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",

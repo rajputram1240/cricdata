@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Venue Matches</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: Arial, sans-serif;
+      padding-top: 70px;
+    }
+    .container {
+      max-width: 800px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #007bff;
+    }
+    .match-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      padding: 15px;
+      background-color: #fff;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .match-card h5 {
+      margin-bottom: 10px;
+    }
+    .btn-primary {
+      background-color: #007bff;
+      border-color: #007bff;
+    }
+    /* Enhanced Navbar */
+    .navbar {
+      background: linear-gradient(90deg, #007bff, #4a90e2);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .navbar-brand {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+    }
+    .navbar-brand img {
+      width: 40px;
+      height: 40px;
+      margin-right: 10px;
+    }
+    .navbar-nav .nav-link {
+      color: #fff;
+      font-weight: 600;
+      font-size: 1rem;
+      margin: 0 10px;
+      position: relative;
+    }
+    .navbar-nav .nav-link::after {
+      content: '';
+      width: 0;
+      height: 2px;
+      background: #ffdd57;
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: width 0.3s ease-in-out;
+    }
+    .navbar-nav .nav-link:hover::after,
+    .navbar-nav .nav-link.active::after {
+      width: 100%;
+    }
+    .navbar-toggler {
+      border: none;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <!-- Enhanced Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">
+        <img src="https://via.placeholder.com/40" alt="Logo">
+        Cricket Portal
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="index.html"><i class="bi bi-house-fill"></i> Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="head2head.html"><i class="bi bi-arrow-left-right"></i> Head to Head</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="venue.html"><i class="bi bi-geo-alt-fill"></i> Venue</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container">
+    <h1>Venue Matches</h1>
+
+    <!-- Venue Selection -->
+    <div class="mb-4">
+      <label for="venueSelect" class="form-label">Choose a Venue:</label>
+      <select id="venueSelect" class="form-select">
+        <option value="">Select Venue</option>
+        <!-- Venues will be populated here -->
+      </select>
+    </div>
+
+    <h2 class="my-4">Matches:</h2>
+    <div id="matchCards">
+      <!-- Matches will be displayed here -->
+    </div>
+    
+  </div>
+
+  <!-- Bootstrap JS and Popper.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+  <script>
+    // Fetch and populate venues in the select box
+    document.addEventListener('DOMContentLoaded', async function() {
+      const venueSelect = document.getElementById('venueSelect');
+
+      try {
+        const response = await fetch('/venue');
+        const venues = await response.json();
+
+        // Populate the select box with venues
+        venueSelect.innerHTML += venues.map(venue => `
+          <option value="${venue}">${venue}</option>
+        `).join('');
+      } catch (error) {
+        console.error('Error fetching venues:', error);
+        alert('An error occurred while fetching venues.');
+      }
+
+      // Add an event listener to fetch matches when a venue is selected
+      venueSelect.addEventListener('change', async function() {
+        const venueId = venueSelect.value;
+        const matchCardsDiv = document.getElementById('matchCards');
+
+        if (!venueId) {
+          matchCardsDiv.innerHTML = '<p>Please select a venue to see matches.</p>';
+          return;
+        }
+
+        try {
+          const response = await fetch(`/matchByVenue?venue=${venueId}`);
+          const matches = await response.json();
+
+          // Display matches
+          matchCardsDiv.innerHTML = matches.length > 0 
+            ? matches.map(match => `
+              <div class="match-card">
+                <h5>${match.matchInfo.team1} vs ${match.matchInfo.team2}</h5>
+                <p><strong>Match Date:</strong> ${new Date(match.matchInfo.matchDate).toLocaleDateString()}</p>
+                <p><strong>League:</strong> ${match.matchInfo.league}</p>
+                <a href="scorecard.html?matchId=${match._id}" class="btn btn-primary">View Scorecard</a>
+              </div>
+            `).join('')
+            : '<p>No matches found for the selected venue.</p>';
+        } catch (error) {
+          console.error('Error fetching matches:', error);
+          alert('An error occurred while fetching matches.');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

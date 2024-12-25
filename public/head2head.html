@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Head to Head</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #f7f7f7;
+      font-family: 'Arial', sans-serif;
+      padding-top: 70px;
+    }
+
+    /* Enhanced Navbar */
+    .navbar {
+      background: linear-gradient(90deg, #007bff, #4a90e2);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar-brand {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+    }
+
+    .navbar-brand img {
+      width: 40px;
+      height: 40px;
+      margin-right: 10px;
+    }
+
+    .navbar-nav .nav-link {
+      color: #fff;
+      font-weight: 600;
+      font-size: 1rem;
+      margin: 0 10px;
+      position: relative;
+    }
+
+    .navbar-nav .nav-link::after {
+      content: '';
+      width: 0;
+      height: 2px;
+      background: #ffdd57;
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: width 0.3s ease-in-out;
+    }
+
+    .navbar-nav .nav-link:hover::after,
+    .navbar-nav .nav-link.active::after {
+      width: 100%;
+    }
+
+    .navbar-toggler {
+      border: none;
+      color: #fff;
+    }
+
+    h1 {
+      color: #007bff;
+      font-size: 2.5rem;
+      text-align: center;
+      margin-bottom: 40px;
+      font-weight: 700;
+    }
+
+    .match-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 4px 8px rgba(0, 123, 255, 0.1);
+      transition: transform 0.2s ease-in-out, box-shadow 0.2s ease;
+    }
+
+    .match-card:hover {
+      transform: scale(1.03);
+      box-shadow: 0 8px 16px rgba(0, 123, 255, 0.3);
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 0.9rem;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <!-- Enhanced Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">
+        <img src="https://via.placeholder.com/40" alt="Logo">
+        Cricket Portal
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="index.html"><i class="bi bi-house-fill"></i> Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="head2head.html"><i class="bi bi-arrow-left-right"></i> Head to Head</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="venue.html"><i class="bi bi-geo-alt-fill"></i> Venue</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container">
+    <h1>Head to Head</h1>
+
+    <div class="mb-3">
+      <label for="league" class="form-label">Select League:</label>
+      <select id="league" class="form-select">
+        <option value="">Select League</option>
+        <option value="Big Bash League">Big Bash League</option>
+        <!-- Add more leagues as needed -->
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="team1" class="form-label">Select Team 1:</label>
+      <select id="team1" class="form-select">
+        <option value="">Select Team 1</option>
+        <!-- Teams will be populated dynamically based on the selected league -->
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="team2" class="form-label">Select Team 2:</label>
+      <select id="team2" class="form-select">
+        <option value="">Select Team 2</option>
+        <!-- Teams will be populated dynamically based on the selected league -->
+      </select>
+    </div>
+
+    <button class="btn btn-primary" onclick="getMatches()">Show Matches</button>
+
+    <h2 class="my-4">Matches:</h2>
+    <div id="matches"></div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p>© 2024 Cricket Portal. All rights reserved.</p>
+  </div>
+
+  <!-- Bootstrap JS and Popper.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+  
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <!-- Existing Script -->
+  <script>
+    // Your existing JavaScript code here
+  </script>
+</body>
+</html>
