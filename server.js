@@ -23,12 +23,11 @@ const scrapeMatchData = async (url) => {
   const page = await browser.newPage();
   await page.goto(url, { waitUntil: 'domcontentloaded' });
 
-  const matchId = url.split('/').pop();
 
   const allScorecards = await page.evaluate(async () => {
     const tables = document.querySelectorAll('.statistic-table');
     const heading = document.querySelector('.large-heading');
-    
+
     if (!heading) throw new Error("Heading not found!");
 
     let team1 = heading.querySelector('span:first-child')?.textContent.trim() || "Unknown";
@@ -40,8 +39,11 @@ const scrapeMatchData = async (url) => {
     team2 = team2.split(' ').filter(word => word.toLowerCase() !== team2Abbr.toLowerCase()).join(' ');
 
     const matchInfoText = heading.querySelector('.comp-sub-title')?.textContent.trim() || "Unknown";
-    const [matchDate, league, venue] = matchInfoText.split("—")[1]?.trim().split("•") || ["Unknown Date", "Unknown League", "Unknown Venue"];
-
+      const matchInfoSplit = matchInfoText.split("—");
+      const matchDate = matchInfoSplit[1]?.trim() || "Unknown Date";
+      const matchInfoSplit2 = matchInfoSplit[0]?.split("•") || ["Unknown League", "Unknown Venue"];
+      const league = matchInfoSplit2[0]?.trim() || "Unknown League";
+      const venue = matchInfoSplit2[1]?.trim() || "Unknown Venue";
     const allData = await Promise.all(
       Array.from(tables).map(async (table, index) => {
         const header = [];
@@ -69,7 +71,7 @@ const scrapeMatchData = async (url) => {
       })
     );
 
-    return { matchId, matchInfo: { team1, team1Abbr, team2, team2Abbr, matchDate, league, venue }, scoreCard: allData.filter(item => item.data.length > 0) };
+    return { matchInfo: { team1, team1Abbr, team2, team2Abbr, matchDate, league, venue }, scoreCard: allData.filter(item => item.data.length > 0) };
   });
 
   await browser.close();
@@ -79,6 +81,7 @@ const scrapeMatchData = async (url) => {
 // Insert Scorecard Endpoint
 app.post('/insertScorecard', async (req, res) => {
   const { url } = req.body;
+  const matchId = url.split('/').pop();
 
   if (!url) {
     return res.status(400).json({ success: false, error: 'No URL provided.' });
@@ -87,7 +90,9 @@ app.post('/insertScorecard', async (req, res) => {
   try {
     const allScorecards = await scrapeMatchData(url);
 
-    await Scorecard.updateOne({ matchId: allScorecards.matchId }, allScorecards, { upsert: true });
+    console.log("............",allScorecards);
+
+    await Scorecard.updateOne({ matchId: matchId }, allScorecards, { upsert: true });
 
     res.json({ success: true, message: 'Match data saved successfully.' });
   } catch (error) {
