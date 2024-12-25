@@ -1,7 +1,7 @@
 const express = require('express');
 const puppeteer = require('puppeteer');
-const Scorecard = require('./scorecard');
-const Team = require('./team');  // Import Team model
+const Scorecard = require('./models/scorecard');
+const Team = require('./models/team');  // Import Team model
 require('dotenv').config();
 const mongoose = require('mongoose');
 
