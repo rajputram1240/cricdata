@@ -1,195 +1,344 @@
 const express = require('express');
-const puppeteer = require('puppeteer');
-const Scorecard = require('./models/scorecard');
-const Team = require('./models/team');  // Import Team model
-require('dotenv').config();
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const session = require('express-session');
+const Match = require('./models/Match');
+const User = require('./models/User'); // Admin User Model
+const Scorecard = require('./models/scorecard');
+const FantasyCombination = require("./models/FantasyCombination");
+const Team = require('./models/team');  // Import Team model
+const multer = require('multer');
+const path = require('path');
+const attachUserDetails = require('./userMiddleware');
+const flash = require('connect-flash');
+
+require('dotenv').config();
 
 const app = express();
+
+// File upload setup using multer
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage: storage });
+
+// Middleware
+app.set('view engine', 'ejs');
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(
+  session({
+    secret: 'secret-key',
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+
 app.use(express.json());
-app.use(express.static('public')); // Serve static files like index.html
+app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static('uploads'));
+app.use(attachUserDetails);
+
+// Middleware for flash messages
+app.use(flash());
+
+// Set locals for flash messages (available in all templates)
+app.use((req, res, next) => {
+  res.locals.success_msg = req.flash('success_msg');
+  res.locals.error_msg = req.flash('error_msg');
+  next();
+});
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('Connected to cricdata database'))
-  .catch(err => console.error('Failed to connect to MongoDB', err));
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB connected'))
+  .catch((err) => console.error(err));
 
-// Helper function to launch puppeteer and scrape data
-const scrapeMatchData = async (url) => {
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
-  const page = await browser.newPage();
-  await page.goto(url, { waitUntil: 'domcontentloaded' });
+// Middleware for authentication
+function isAuthenticated(req, res, next) {
+  if (req.session.role != "admin") {
+    return res.redirect('/');
+  } else {
+    next();
+  }
+}
 
+// Middleware for authentication
+function isAuthenticatedUser(req, res, next) {
+  if (!req.session.username) {
+    return res.redirect('/');
+  } else {
+    next();
+  }
+}
 
-  const allScorecards = await page.evaluate(async () => {
-    const tables = document.querySelectorAll('.statistic-table');
-    const heading = document.querySelector('.large-heading');
+// POST route to handle image upload
+app.post('/postCombination', isAuthenticatedUser,upload.single('image'), async (req, res) => {
+  const imageUrl = `/uploads/${req.file.filename}`;
+  const { matchId } = req.body;
 
-    if (!heading) throw new Error("Heading not found!");
-
-    let team1 = heading.querySelector('span:first-child')?.textContent.trim() || "Unknown";
-    const team1Abbr = heading.querySelector('span:first-child > .abbr-tag > span')?.textContent.trim() || "UNK";
-    let team2 = heading.querySelector('span:nth-child(3)')?.textContent.trim() || "Unknown";
-    const team2Abbr = heading.querySelector('span:nth-child(3) > .abbr-tag > span')?.textContent.trim() || "UNK";
-
-    team1 = team1.split(' ').filter(word => word.toLowerCase() !== team1Abbr.toLowerCase()).join(' ');
-    team2 = team2.split(' ').filter(word => word.toLowerCase() !== team2Abbr.toLowerCase()).join(' ');
-
-    const matchInfoText = heading.querySelector('.comp-sub-title')?.textContent.trim() || "Unknown";
-      const matchInfoSplit = matchInfoText.split("—");
-      const matchDate = matchInfoSplit[1]?.trim() || "Unknown Date";
-      const matchInfoSplit2 = matchInfoSplit[0]?.split("•") || ["Unknown League", "Unknown Venue"];
-      const league = matchInfoSplit2[0]?.trim() || "Unknown League";
-      const venue = matchInfoSplit2[1]?.trim() || "Unknown Venue";
-    const allData = await Promise.all(
-      Array.from(tables).map(async (table, index) => {
-        const header = [];
-        const tableData = [];
-        let remark = "Bowling";
-
-        table.querySelectorAll('thead tr').forEach(row => {
-          row.querySelectorAll('th').forEach(col => {
-            header.push(col?.textContent.trim());
-            if (col?.textContent.trim() === "Batsman") remark = "Batting";
-          });
-        });
-
-        table.querySelectorAll('tbody tr').forEach(row => {
-          const columns = row.querySelectorAll('td');
-          if (columns.length >= 3) {
-            const temp = {};
-            columns.forEach((col, colIndex) => temp[header[colIndex]] = col.textContent.trim());
-            tableData.push(temp);
-          }
-        });
-
-        const innings = (index === 0 || index === 2) ? "1st innings" : "2nd innings";
-        return { innings: `${innings} ${remark}`, data: tableData };
-      })
-    );
-
-    return { matchInfo: { team1, team1Abbr, team2, team2Abbr, matchDate, league, venue }, scoreCard: allData.filter(item => item.data.length > 0) };
-  });
-
-  await browser.close();
-  return allScorecards;
-};
-
-// Insert Scorecard Endpoint
-app.post('/insertScorecard', async (req, res) => {
-  const { url } = req.body;
-  const matchId = url.split('/').pop();
-
-  if (!url) {
-    return res.status(400).json({ success: false, error: 'No URL provided.' });
+  if (!matchId) {
+    req.flash('error_msg', 'Match ID is required.');
   }
 
-  try {
-    const allScorecards = await scrapeMatchData(url);
-
-    console.log("............",allScorecards);
-
-    await Scorecard.updateOne({ matchId: matchId }, allScorecards, { upsert: true });
-
-    res.json({ success: true, message: 'Match data saved successfully.' });
-  } catch (error) {
-    console.error('Error scraping scorecards:', error.message);
-    res.status(500).json({ success: false, error: error.message });
+  if (!req.file) {
+    req.flash('error_msg', 'Team image is required.');
   }
+
+
+  const userId = await User.findById(req.session.userId);
+
+  const combination = new FantasyCombination({ 
+    userId: userId._id, // Logged-in user's ID
+    matchId, 
+    teamImage: imageUrl, 
+    likes: [], 
+    comments: [] 
+  });
+  await combination.save();
+  
+  req.flash('success_msg', `Team combination by successfully posted!`);
+  res.json({ success: true, message: `Team combination by successfully posted!` });
 });
 
-// Scrape and store international teams in the database
-app.post('/scrapeTeams', async (req, res) => {
-  const { url } = req.body;
-
-  if (!url) {
-    return res.status(400).json({ success: false, error: 'No URL provided.' });
-  }
-
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
-  const page = await browser.newPage();
-  await page.goto(url, { waitUntil: 'domcontentloaded' });
-
+// POST route to handle liking a combination
+app.post('/likeCombination/:id', async (req, res) => {
   try {
-    // Scrape the team names from the page
-    const teams = await page.evaluate(() => {
-      const teamElements = document.querySelectorAll('.statistic-table tbody tr'); // Update the selector as per the page structure
-      const typeteam = document.querySelector('.comp-sub-title strong').textContent.trim();
-      const teamNames = [];
+    // Find the combination by its ID
+    const combination = await FantasyCombination.findById(req.params.id);
 
-      teamElements.forEach(row => {
-        const firstColumn = row.querySelector('td'); // Get the first <td> of the row
-        if (firstColumn) {
-          teamNames.push({ name: firstColumn.textContent.trim(), type: typeteam });
-        }
-      });
-      return teamNames;
-    });
-
-    if (teams.length > 0) {
-      const results = [];
-      
-      // Iterate over teams and insert only if not already in database
-      for (const team of teams) {
-        const existingTeam = await Team.findOne({ where: { name: team.name, type: team.type } });
-        
-        if (!existingTeam) {
-          const newTeam = await Team.create(team);
-          results.push(newTeam);
-        }
-      }
-
-      res.json({
-        success: true,
-        message: 'Teams processed successfully',
-        stored: results.length,
-        skipped: teams.length - results.length,
-        teams: results
-      });
-    } else {
-      res.status(404).json({ success: false, message: 'No teams found on the page' });
+    if (!combination) {
+      return res.status(404).json({ success: false, message: 'Combination not found' });
     }
-  } catch (error) {
-    console.error('Error scraping teams:', error.message);
-    res.status(500).json({ success: false, error: error.message });
-  } finally {
-    await browser.close();
-  }
-});
 
+    // Assuming 'user' is the logged-in user, you can replace this with actual user information
+     const userId = req.session.userId;  // Get user ID from the session or token
 
-// Get All League Teams Endpoint
-app.get('/getAllLeagueTeam', async (req, res) => {
-  const { league } = req.query;
+    // Check if the user has already liked this combination
+    if (combination.likes.includes(userId)) {
+      req.flash('error_msg', 'You have already liked this combination.');
+      return res.status(400).json({ success: false, message: 'You have already liked this combination' });
+    }
 
-  if (!league) {
-    return res.status(400).json({ success: false, error: 'Please select league name.' });
-  }
+    // Add the user ID to the likes array
+    combination.likes.push(userId);
 
-  try {
-    const result = await Team.find({ "type": league }).select('name -_id');
+    // Save the updated combination
+    await combination.save();
     
-    // Extract names into an array
-    const resultSet = result.map(team => team.name);
-
-    if (resultSet.length > 0) {
-      res.json(resultSet);
-    } else {
-      res.status(400).json({ success: false, error: 'No matches found.' });
-    }
+    req.flash('success_msg', 'You have liked this combination.');
+    res.json({ success: true, likes: combination.likes.length });
   } catch (error) {
-    console.error('Error:', error);
-    res.status(400).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
-// Head-to-Head Matches Endpoint
+// POST route to handle commenting
+app.post('/commentCombination/:id', async (req, res) => {
+  try {
+    // Find the combination by its ID
+    const combination = await FantasyCombination.findById(req.params.id);
+
+    if (!combination) {
+      return res.status(404).json({ success: false, message: 'Combination not found' });
+    }
+
+    // Assuming 'user' is the logged-in user, you can replace this with actual user information
+    const userId = req.session.userId;  // Get user ID from the session or token
+    const username = req.session.username; // Get username from the session or token
+
+    // Create a new comment
+    const newComment = {
+      userId,
+      username, // User's username
+      text: req.body.comment, // Comment text from the request
+    };
+
+    // Add the comment to the combination
+    combination.comments.push(newComment);
+
+    // Save the updated combination
+    await combination.save();
+    
+    req.flash('success_msg', 'You comment on this combination.');
+    res.json({ success: true, username: username, comment: newComment });
+  } catch (error) {
+    req.flash('error_msg', error.message);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Route to get upcoming matches
+app.get('/matches', async (req, res) => {
+  const matches = await Match.find().sort({ matchDate: 1 });
+  console.log(matches);
+  res.render('fantasy', { 
+    title: 'Fantasy',
+    activePage: "fantasy",
+    matches 
+  });
+});
+
+// Route to get fantasy combinations for a match
+app.get('/fantasy/:matchId', async (req, res) => {
+  const { matchId } = req.params;
+  const match = await Match.findById(matchId);
+
+   const filter = req.query.filter || 'newest';  // Default to 'newest'
+
+  let combinations;
+  if (filter === 'newest') {
+    combinations = await FantasyCombination.find({ matchId,approved: "approved" }).populate('userId').sort({ createdAt: -1 });
+  } else if (filter === 'oldest') {
+    combinations = await FantasyCombination.find({ matchId,approved: "approved" }).populate('userId').sort({ createdAt: 1 });
+  } else if (filter === 'mostLikes') {
+    combinations = await FantasyCombination.find({ matchId,approved: "approved" }).populate('userId').sort({ 'likes.length': -1 });
+  } else if (filter === 'mostComments') {
+    combinations = await FantasyCombination.find({ matchId, approved: "approved" }).populate('userId').sort({ 'comments.length': -1 });
+  }
+  
+  res.render('fantasyDetails', { 
+    title: 'Fantasy Discussion',
+    activePage: "fantasy",
+    filter,
+    match,
+    matchId, combinations });
+});
+
+
+app.post('/combinations/approve/:id', isAuthenticated, async (req, res) => {
+  try {
+    await FantasyCombination.findByIdAndUpdate(req.params.id, { approved: "approved" });
+    res.json({ success: true, message: 'Combination approved successfully.' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error approving combination.' });
+  }
+});
+
+app.post('/combinations/reject/:id', isAuthenticated, async (req, res) => {
+  try {
+    await FantasyCombination.findByIdAndUpdate(req.params.id, { approved: "rejected" });
+    res.json({ success: true, message: 'Combination rejected successfully.' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error approving combination.' });
+  }
+});
+
+app.get('/combinations/pending', isAuthenticated, async (req, res) => {
+  try {
+    const pendingCombinations = await FantasyCombination.find({ approved: "pending" });
+    res.render('combinations', { combinations: pendingCombinations });
+  } catch (error) {
+    res.status(500).send('Error fetching pending combinations.');
+  }
+});
+
+
+app.get('/register', (req, res) => {
+  res.render('register', { 
+    title: 'User registration',
+    activePage: "register",
+    message: ""
+   });
+});
+
+// Handle registration
+app.post('/register', async (req, res) => {
+  const { username, email ,password } = req.body;
+  try {
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.render('register', { message: 'Username already exists' });
+    }
+
+    const user = new User({ username, password, email });
+    await user.save();
+    req.flash('success_msg', 'Registration successful! You can now log in.');
+    res.redirect('/login');
+  } catch (err) {
+    req.flash('error_msg', 'Registration failed. Please try again.');
+    res.redirect('/register');
+  }
+});
+
+app.get('/profile',isAuthenticatedUser, async (req, res) => {
+  const user = await User.findById(req.session.userId);
+ console.log("user",user)
+  res.render('profile',{
+    title: 'User Profile',
+    activePage: "profile",
+    user
+  }); // Pass user to the EJS template
+});
+
+app.post('/profile', isAuthenticatedUser, upload.single('profileImage'), async (req, res) => {
+
+  try {
+    const user = await User.findById(req.session.userId);
+    
+    // Update username and email
+    if (req.body.username) user.username = req.body.username;
+    if (req.body.email) user.email = req.body.email;
+    
+    // If a new profile image is uploaded, update the image field
+    if (req.file) user.profileImage = `/uploads/${req.file.filename}`;
+    
+    await user.save();
+    req.session.userId = user._id;
+    req.session.username = user.username;
+    req.session.email = user.email;
+    req.session.role = user.role;
+    req.session.profileImage = user.profileImage;
+
+    req.flash('success_msg', 'Your profile successfully updated');
+    res.redirect('/profile');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server Error");
+  }
+});
+
+// Render login page
+app.get('/', (req, res) => {
+  res.render('index', {
+    title: 'Home',
+    activePage: "home",
+    heroImage: 'https://source.unsplash.com/1600x900/?cricket',
+    heroText: 'Welcome to Cricket Portal',
+    cards: [
+      {
+        image: 'https://source.unsplash.com/600x400/?stadium',
+        title: 'Venue Matches',
+        description: 'Explore matches grouped by venue and get detailed insights.',
+        link: '/venue',
+      },
+      {
+        image: 'https://source.unsplash.com/600x400/?team',
+        title: 'Head to Head',
+        description: 'Analyze match history between your favorite teams.',
+        link: '/h2h',
+      },
+    ],
+    year: new Date().getFullYear(),
+  });
+});
+
+app.get('/h2h',async (req,res)=> {
+  const leagues = await Team.distinct("type");
+  res.render('h2h',{
+    title: 'Head to head',
+    activePage: "head2head",
+    leagues,
+    matches: []
+  });
+})
+
 app.get('/head2head', async (req, res) => {
   const { team1, team2 } = req.query;
 
@@ -221,8 +370,46 @@ app.get('/league', async (req, res) => {
   }
 });
 
-// Get Unique Venues Endpoint
 app.get('/venue', async (req, res) => {
+  try {
+    const venues = await Scorecard.distinct("matchInfo.venue");
+    
+    res.render('venue',{
+      title: 'Venues',
+      activePage: "venue",
+      venues,
+      matches: []
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+app.get('/scorecard/:matchId', async (req, res) => {
+  const { matchId } = req.params;
+
+  try {
+    // Find the scorecard by ID
+    const scorecard = await Scorecard.findById(matchId);
+    
+    if (!scorecard) {
+      return res.status(404).send('Match not found');
+    }
+
+    // Pass scorecard data to the view
+    res.render('scorecard', { 
+      title: 'Scorecard',
+      activePage: "scorecard",
+      matchId: matchId,
+      scorecard });
+  } catch (error) {
+    console.error('Error fetching scorecard:', error);
+    res.status(500).send('Error fetching scorecard');
+  }
+});
+
+// Get Unique Venues Endpoint
+app.get('/venues', async (req, res) => {
   try {
     const venues = await Scorecard.distinct("matchInfo.venue");
     res.json(venues);
@@ -267,7 +454,108 @@ app.get('/matchDetails', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+// Get All League Teams Endpoint
+app.get('/getAllLeagueTeam', async (req, res) => {
+  const { league } = req.query;
+
+  if (!league) {
+    return res.status(400).json({ success: false, error: 'Please select league name.' });
+  }
+
+  try {
+    const result = await Team.find({ "type": league }).select('name -_id');
+    
+    // Extract names into an array
+    const resultSet = result.map(team => team.name);
+
+    if (resultSet.length > 0) {
+      res.json(resultSet);
+    } else {
+      res.status(400).json({ success: false, error: 'No matches found.' });
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(400).json({ success: false, error: error.message });
+  }
 });
+
+app.get("/login", async (req, res)=>{
+  res.render('login',{
+    title: 'User Login',
+    activePage: "login",
+    message: ""
+  });
+})
+
+// Handle login
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    const user = await User.findOne({ username });
+    if (user && (await user.isPasswordValid(password))) {
+      req.session.userId = user._id;
+      req.session.username = user.username;
+      req.session.email = user.email;
+      req.session.role = user.role;
+      req.session.profileImage = user.profileImage;
+      req.flash('success_msg', `Welcome back, ${user.username}!`);
+      res.redirect('/profile');
+    } else {
+      req.flash('error_msg', 'Invalid email or password.');
+      res.redirect('/login');sssss
+    }
+  } catch (err) {
+    req.flash('error_msg', 'Login failed. Please try again.');
+    res.redirect('/login');
+  }
+});
+
+// Logout
+app.get('/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.redirect('/');
+  });
+});
+
+// Admin Dashboard
+app.get('/dashboard', isAuthenticated, async (req, res) => {
+  const matches = await Match.find();
+  res.render('dashboard', { matches });
+});
+
+// Add Match Page
+app.get('/matches/new', isAuthenticated, (req, res) => {
+  res.render('add-match');
+});
+
+// Add Match Handler
+app.post('/matches', isAuthenticated, async (req, res) => {
+  const { team1, team2, date, venue } = req.body;
+  const match = new Match({ team1, team2, date, venue });
+  await match.save();
+  res.redirect('/dashboard');
+});
+
+// Edit Match Page
+app.get('/matches/:id/edit', isAuthenticated, async (req, res) => {
+  const match = await Match.findById(req.params.id);
+  res.render('edit-match', { match });
+});
+
+// Update Match Handler
+app.post('/matches/:id', isAuthenticated, async (req, res) => {
+  const { team1, team2, date, venue } = req.body;
+  await Match.findByIdAndUpdate(req.params.id, { team1, team2, date, venue });
+  res.redirect('/dashboard');
+});
+
+// Delete Match Handler
+app.post('/matches/:id/delete', isAuthenticated, async (req, res) => {
+  await Match.findByIdAndDelete(req.params.id);
+  res.redirect('/dashboard');
+});
+
+// Start Server
+const PORT = 3000;
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

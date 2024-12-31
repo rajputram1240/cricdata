@@ -1,0 +1,190 @@
+<style>
+   /* Enhanced Navbar */
+   .navbar {
+      background: linear-gradient(90deg, #007bff, #4a90e2);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar-brand {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+    }
+
+    .navbar-brand img {
+      width: 40px;
+      height: 40px;
+      margin-right: 10px;
+    }
+
+    .navbar-nav .nav-link {
+      color: #fff;
+      font-weight: 600;
+      font-size: 1rem;
+      margin: 0 10px;
+      position: relative;
+    }
+
+    .navbar-nav .nav-link::after {
+      content: '';
+      width: 0;
+      height: 2px;
+      background: #ffdd57;
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: width 0.3s ease-in-out;
+    }
+
+    .navbar-nav .nav-link:hover::after,
+    .navbar-nav .nav-link.active::after {
+      width: 100%;
+    }
+
+    .navbar-toggler {
+      border: none;
+      color: #fff;
+    }
+
+    .dropdown-menu {
+      background-color: #007bff;
+    }
+
+    .navbar .dropdown-item {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .navbar .dropdown-menu {
+      background-color: #2784ea; /* Light background for dropdown */
+      border-radius: 0.375rem;
+    }
+
+    .navbar .dropdown-item:hover {
+      background-color: #007bff;
+      color: #fff;
+    }
+
+    /* Navbar Styling */
+.navbar {
+  background: linear-gradient(90deg, #007bff, #4a90e2);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+}
+
+.navbar-brand img {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+}
+
+.navbar-nav .nav-link {
+  color: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+  margin: 0 10px;
+  position: relative;
+}
+
+.navbar-nav .nav-link::after {
+  content: '';
+  width: 0;
+  height: 2px;
+  background: #ffdd57;
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: width 0.3s ease-in-out;
+}
+
+.navbar-nav .nav-link:hover::after,
+.navbar-nav .nav-link.active::after {
+  width: 100%;
+}
+
+/* Dropdown Styling */
+.nav-item .dropdown-menu {
+  background-color: #4593e1; /* Light background for dropdown */
+  border-radius: 0.375rem;
+}
+
+.nav-item .dropdown-item:hover {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.navbar-nav .nav-link.active {
+  color: #ffdd57 !important;
+}
+
+.btn-link {
+  color: #000;
+}
+</style>
+
+<!-- navbar.ejs -->
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="/">
+        <img src="https://via.placeholder.com/40" alt="Logo">
+        Cricket Portal
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link <%= activePage === 'home' ? 'active' : '' %>" href="/"><i class="bi bi-house-fill"></i> Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <%= activePage === 'fantasy' ? 'active' : '' %>" href="/matches"><i class="bi bi-chat-fill"></i> Fantasy</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <%= activePage === 'head2head' ? 'active' : '' %>" href="/h2h"><i class="bi bi-arrow-left-right"></i> Head to Head</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <%= activePage === 'venue' ? 'active' : '' %>" href="/venue"><i class="bi bi-geo-alt-fill"></i> Venue</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a 
+              class="nav-link dropdown-toggle" 
+              href="#" 
+              id="userDropdown" 
+              role="button" 
+              data-bs-toggle="dropdown" 
+              aria-expanded="false">
+              <i class="bi bi-person-fill"></i> 
+              <%= user ? user.username : 'Guest' %> <!-- Dynamically show username or Guest -->
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+              <% if (user) { %> <!-- If user is logged in -->
+                <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                <% if(user.role == "admin"){ %>
+                  <li><a class="dropdown-item" href="/dashboard">Admin Dashboard</a></li>
+               <% } %>
+                <li>
+                  <a class="dropdown-item" href="/logout">Logout</a>
+                </li>
+              <% } else { %> <!-- If no user is logged in -->
+                <li><a class="dropdown-item" href="/login">Login</a></li>
+                <li><a class="dropdown-item" href="/register">Register</a></li>
+              <% } %>
+            </ul>
+          </li>          
+        </ul>
+      </div>
+    </div>
+  </nav>  
+  
