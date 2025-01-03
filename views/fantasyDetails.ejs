@@ -189,7 +189,7 @@ h5 {
       <% } %>
       <% if (user) { %>  
     <!-- Form to post a combination image -->
-    <form id="postCombinationForm" enctype="multipart/form-data">
+    <form action="/postCombination" method="POST" enctype="multipart/form-data">
       <div class="mb-3">
         <label for="combinationImage" class="form-label">Upload Your Fantasy Combination Image</label>
         <input type="file" class="form-control" id="combinationImage" name="image" required />
@@ -270,29 +270,6 @@ document.querySelectorAll('.comment-toggle').forEach(button => {
         const commentsSection = document.getElementById(`comments-${combinationId}`);
         commentsSection.style.display = commentsSection.style.display === 'none' ? 'block' : 'none';
       });
-    });
-
-    // Handle form submission for image upload
-    document.getElementById('postCombinationForm').addEventListener('submit', async function(event) {
-      event.preventDefault();
-
-      const formData = new FormData(this);
-      try {
-        const response = await fetch('/postCombination', {
-          method: 'POST',
-          body: formData,
-        });
-        const result = await response.json();
-        if (result.success) {
-          // Reload combinations after successful upload
-          window.location.reload();
-        } else {
-          alert('Error posting combination.');
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred while posting the combination.');
-      }
     });
 
     // Handle like button click

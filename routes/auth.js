@@ -38,15 +38,24 @@ router.post('/register', async (req, res) => {
 });
 
 router.get('/profile',isAuthenticatedUser, async (req, res) => {
-  const user = await User.findById(req.session.userId).select('-password');
   res.render('profile',{
     title: 'User Profile',
     activePage: "profile",
-    user
-  }); // Pass user to the EJS template
+    user: req.session
+  }); 
 });
 
-router.post('/profile', isAuthenticatedUser, upload.single('profileImage'), async (req, res) => {
+router.post('/profile', isAuthenticatedUser, upload.single('profileImage'), (req, res, next) => {
+  if (req.fileValidationError) {
+    req.flash('error_msg', 'Only image files are allowed!');
+    return res.redirect('/profile');
+  }
+  if (req.file && !req.file.mimetype.startsWith('image/')) {
+    req.flash('error_msg', 'Only image files are allowed!');
+    return res.redirect('/profile');
+  }
+  next();
+}, async (req, res) => {
 
   try {
     if (req.file){
@@ -55,7 +64,7 @@ router.post('/profile', isAuthenticatedUser, upload.single('profileImage'), asyn
 
       // Extract file extension (including the dot)
       const fileExtension = path.extname(originalFileName);  // e.g., '.jpg'
-
+    
       // Generate random file name with crypto
       const randomFileName = `${crypto.randomBytes(16).toString('hex')}${fileExtension}`;
       const blob = bucket.file(randomFileName);
@@ -159,7 +168,7 @@ router.post('/login', async (req, res) => {
       res.redirect('/profile');
     } else {
       req.flash('error_msg', 'Invalid email or password.');
-      res.redirect('/login');sssss
+      res.redirect('/login');
     }
   } catch (err) {
     req.flash('error_msg', 'Login failed. Please try again.');

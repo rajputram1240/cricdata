@@ -12,15 +12,28 @@ const path = require('path');
 
 
 // POST route to handle image upload
-router.post('/postCombination', isAuthenticatedUser,upload.single('image'), async (req, res) => {
+router.post('/postCombination', isAuthenticatedUser,upload.single('image'), (req, res, next) => {
+  const { matchId } = req.body;
+  if (req.fileValidationError) {
+    req.flash('error_msg', 'Only image are allowed!');
+    return res.redirect('/fantasy/'+matchId);
+  }
+  if (req.file && !req.file.mimetype.startsWith('image/')) {
+    req.flash('error_msg', 'Only image are allowed!');
+    return res.redirect('/fantasy/'+matchId);
+  }
+  next();
+}, async (req, res) => {
     try {
         const { matchId } = req.body;
   
     if (!matchId) {
       req.flash('error_msg', 'Match ID is required.');
+      return res.redirect('/fantasy/'+matchId);
     }
         if (!req.file) {
-          return res.status(400).send('No file uploaded.');
+          req.flash('error_msg', 'No file uploaded.');
+          return res.redirect('/fantasy/'+matchId);
         }
         const originalFileName = req.file.originalname;  // e.g., 'image.jpg'
         // Extract file extension (including the dot)
@@ -32,8 +45,8 @@ router.post('/postCombination', isAuthenticatedUser,upload.single('image'), asyn
         const blobStream = blob.createWriteStream();
     
         blobStream.on('error', (err) => {
-          console.error('Upload error:', err);
-          res.status(500).send('Unable to upload file.');
+          req.flash('error_msg', 'Unable to upload file.');
+          return res.redirect('/fantasy/'+matchId);
         });
     
         blobStream.on('finish', async () => {
@@ -52,14 +65,14 @@ router.post('/postCombination', isAuthenticatedUser,upload.single('image'), asyn
           });
 
           await combination.save();
-          req.flash('success_msg', `Team combination by successfully posted!`);
-          res.json({ success: true, message: `Team combination by successfully posted!` });
+          req.flash('success_msg', `Team combination successfully posted!, Admin will approve soon.`);
+          return res.redirect('/fantasy/'+matchId);
         });
     
         blobStream.end(req.file.buffer);
       } catch (err) {
-        console.error('Error:', err);
-        res.status(500).send('An error occurred.');
+        req.flash('error_msg', err.message);
+        res.json({ success: true, message: err.message});
       }
   });
   
