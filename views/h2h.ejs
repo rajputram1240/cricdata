@@ -155,6 +155,12 @@ h5 {
 .card-body {
   padding: 20px;
 }
+
+.select2-container--default .select2-selection--multiple {
+            border: 1px solid #ced4da;
+            border-radius: .25rem;
+            padding: .375rem .75rem;
+        }
   </style>
 <body>
   <!-- Include Navbar -->
@@ -175,7 +181,6 @@ h5 {
     <h1>Head to Head</h1>
 
     <div class="mb-3">
-      <label for="league" class="form-label">Select League:</label>
       <select id="league" class="form-select">
         <option value="">Select League</option>
         <% leagues.forEach(league => { %>
@@ -185,7 +190,6 @@ h5 {
     </div>
 
     <div class="mb-3">
-      <label for="team1" class="form-label">Select Team 1:</label>
       <select id="team1" class="form-select">
         <option value="">Select Team 1</option>
         <!-- Teams will be populated dynamically based on the selected league -->
@@ -193,7 +197,6 @@ h5 {
     </div>
 
     <div class="mb-3">
-      <label for="team2" class="form-label">Select Team 2:</label>
       <select id="team2" class="form-select">
         <option value="">Select Team 2</option>
         <!-- Teams will be populated dynamically based on the selected league -->
@@ -223,6 +226,85 @@ h5 {
 
   <!-- Include Footer -->
   <%- include('partials/footer', { year: new Date().getFullYear() }) %>
-  
+  <script>
+    $(document).ready(function() {
+        $('#league').select2({
+            placeholder: "Select League",
+            allowClear: true,
+            maximumSelectionLength: 2,
+            width: 'resolve'
+        });
+
+        $('#team1').select2({
+            placeholder: "Select Team 1",
+            allowClear: true,
+            maximumSelectionLength: 2,
+            width: 'resolve'
+        });
+
+        $('#team2').select2({
+            placeholder: "Select Team 2",
+            allowClear: true,
+            maximumSelectionLength: 2,
+            width: 'resolve'
+        });
+
+        $('#league').on('change', function() {
+                const leagues = $(this).val(); // Array of selected values
+                filterTeams(leagues);
+            });
+
+         async function filterTeams(leagues) {
+              const league = leagueSelect.value;
+        if (!league) return;
+    
+        try {
+          const response = await fetch(`/getAllLeagueTeam?league=${league}`);
+          const teams = await response.json();
+          
+          // Populate team 1 and team 2 dropdowns
+          updateTeamSelects(teams);
+        } catch (error) {
+          console.error('Error fetching teams:', error);
+          alert('An error occurred while fetching teams.');
+        }
+            }
+
+
+             // Update team selects with the list of teams
+      function updateTeamSelects(teams) {
+        team1Select.innerHTML = '<option value="">Select Team 1</option>';
+        team2Select.innerHTML = '<option value="">Select Team 2</option>';
+    
+        teams.forEach(team => {
+          const option = `<option value="${team}">${team}</option>`;
+          team1Select.innerHTML += option;
+          team2Select.innerHTML += option;
+        });
+      }
+    
+      $('#team1').on('change', function() {
+        updateTeamOptions();
+      });
+
+      $('#team2').on('change', function() {
+        updateTeamOptions();
+      });
+
+      function updateTeamOptions() {
+        const team1Selected = team1Select.value;
+        const team2Selected = team2Select.value;
+    
+        // Remove the selected team from the other dropdown
+        team2Select.querySelectorAll('option').forEach(option => {
+          option.disabled = option.value === team1Selected || option.value === team2Selected;
+        });
+    
+        team1Select.querySelectorAll('option').forEach(option => {
+          option.disabled = option.value === team1Selected || option.value === team2Selected;
+        });
+      }
+      });
+</script>
 </body>
 </html>

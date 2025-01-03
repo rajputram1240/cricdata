@@ -155,6 +155,12 @@ h5 {
 .card-body {
   padding: 20px;
 }
+
+.select2-container--default .select2-selection--multiple {
+            border: 1px solid #ced4da;
+            border-radius: .25rem;
+            padding: .375rem .75rem;
+        }
   </style>
 <body>
   <!-- Include Navbar -->
@@ -177,7 +183,7 @@ h5 {
   
     <!-- Venue Selection -->
     <div class="mb-4">
-      <label for="venueSelect" class="form-label">Choose a Venue:</label>
+      <!-- <label for="venueSelect" class="form-label">Choose a Venue:</label> -->
       <select id="venueSelect" class="form-select">
         <option value="">Select Venue</option>
       <!-- Dynamically populate venues here, excluding venues with less than 3 characters -->
@@ -205,6 +211,51 @@ h5 {
   
   <!-- Include Footer -->
   <%- include('partials/footer', { year: new Date().getFullYear() }) %>
+    <script>
+        $(document).ready(function() {
+            $('#venueSelect').select2({
+                placeholder: "Select Venue",
+                allowClear: true,
+                maximumSelectionLength: 2,
+                width: 'resolve'
+            });
+
+            $('#venueSelect').on('change', function() {
+                const venueId = $(this).val(); // Array of selected values
+                filterMatchDetails(venueId);
+            });
+
+           async function filterMatchDetails(venueId) {
+              
+          const matchCardsDiv = document.getElementById('matchCards');
   
+          if (!venueId) {
+            matchCardsDiv.innerHTML = '<p>Please select a venue to see matches.</p>';
+            return;
+          }
+  
+          try {
+            const response = await fetch(`/matchByVenue?venue=${venueId}`);
+            const matches = await response.json();
+  
+            // Display matches
+            matchCardsDiv.innerHTML = matches.length > 0 
+              ? matches.map(match => `
+                <div class="match-card">
+                  <h5>${match.matchInfo.team1} vs ${match.matchInfo.team2}</h5>
+                  <p><strong>Match Date:</strong> ${new Date(match.matchInfo.matchDate).toLocaleDateString()}</p>
+                  <p><strong>League:</strong> ${match.matchInfo.league}</p>
+                  <a href="scorecard/${match._id}" class="btn btn-primary">View Scorecard</a>
+                </div>
+              `).join('')
+              : '<p>No matches found for the selected venue.</p>';
+          } catch (error) {
+            console.error('Error fetching matches:', error);
+            alert('An error occurred while fetching matches.');
+          }
+              
+            }
+        });
+    </script>
 </body>
 </html>

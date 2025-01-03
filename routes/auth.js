@@ -38,7 +38,7 @@ router.post('/register', async (req, res) => {
 });
 
 router.get('/profile',isAuthenticatedUser, async (req, res) => {
-  const user = await User.findById(req.session.userId);
+  const user = await User.findById(req.session.userId).select('-password');
   res.render('profile',{
     title: 'User Profile',
     activePage: "profile",
