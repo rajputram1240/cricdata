@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+    <%- include('partials/admin_header', { activePage: activePage }) %>
+    <style>
+        body {
+          height: 100vh;
+          overflow: hidden;
+        }
+        .sidebar {
+          width: 250px;
+          background-color: #343a40;
+          color: #fff;
+          padding: 20px;
+          position: fixed;
+          height: 100%;
+        }
+        .sidebar a {
+          color: #fff;
+          text-decoration: none;
+          display: block;
+          margin: 10px 0;
+          padding: 10px;
+          border-radius: 4px;
+        }
+        .sidebar a:hover {
+          background-color: #495057;
+        }
+        .content {
+          margin-left: 250px;
+          width: calc(100% - 250px);
+          padding: 20px;
+          overflow-y: auto;
+        }
+        @media (max-width: 768px) {
+          .sidebar {
+            position: absolute;
+            z-index: 1000;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+          }
+          .sidebar.show {
+            transform: translateX(0);
+          }
+          .content {
+            margin-left: 0;
+            width: 100%;
+          }
+        }
+        .menu-toggle {
+          display: none;
+          position: fixed;
+          top: 15px;
+          left: 15px;
+          z-index: 1100;
+          background-color: #343a40;
+          color: #fff;
+          border: none;
+          padding: 10px 15px;
+          border-radius: 4px;
+        }
+        @media (max-width: 768px) {
+          .menu-toggle {
+            display: block;
+          }
+        }
+      </style>
+<body>
+    <%- include('partials/adm_sdbar', { activePage: activePage }) %>
+
+
+  <!-- Main Content -->
+  <div class="content">
+    <h1 class="text-center">All Team Combinations</h1>
+    <table class="table table-bordered table-responsive">
+      <thead>
+        <tr>
+          <th>Team 1</th>
+          <th>Team 2</th>
+          <th>Match Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% combinations.forEach(combination => { %>
+          <tr>
+            <td><%= combination.team1 %></td>
+            <td><%= combination.team2 %></td>
+            <td><%= new Date(combination.matchDate).toLocaleDateString() %></td>
+            <td>
+              <span class="badge 
+                <%= combination.approved === 'approved' ? 'bg-success' : 
+                    combination.approved === 'rejected' ? 'bg-danger' : 
+                    'bg-warning' %>">
+                <%= combination.approved.charAt(0).toUpperCase() + combination.approved.slice(1) %>
+              </span>
+            </td>
+            <td>
+              <% if (combination.approved === 'pending') { %>
+                <form action="/combinations/<%= combination._id %>/approve" method="POST" style="display:inline;">
+                  <button class="btn btn-success btn-sm">Approve</button>
+                </form>
+                <form action="/combinations/<%= combination._id %>/reject" method="POST" style="display:inline;">
+                  <button class="btn btn-danger btn-sm">Reject</button>
+                </form>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <%- include('partials/admin_footer', { year: new Date().getFullYear() }) %>
+  <script>
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('show');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!sidebar.contains(e.target) && e.target !== menuToggle) {
+        sidebar.classList.remove('show');
+      }
+    });
+  </script>
+</body>
+</html>

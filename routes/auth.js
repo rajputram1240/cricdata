@@ -186,18 +186,26 @@ router.get('/logout', (req, res) => {
 // Admin Dashboard
 router.get('/dashboard', isAuthenticated, async (req, res) => {
   const matches = await Match.find();
-  res.render('dashboard', { matches });
+  res.render('dashboard', { matches,
+    title: 'dashboard',
+    activePage: "dashboard",
+    message: ""
+   });
 });
 
 // Add Match Page
 router.get('/matches/new', isAuthenticated, (req, res) => {
-  res.render('add-match');
+  res.render('add-match',{
+    title: 'Add New Match',
+    activePage: "AddMatch",
+    message: ""
+  });
 });
 
 // Add Match Handler
 router.post('/matches', isAuthenticated, async (req, res) => {
-  const { team1, team2, date, venue } = req.body;
-  const match = new Match({ team1, team2, date, venue });
+  const { team1, team2, date, venue,team1Probable, team2Probable } = req.body;
+  const match = new Match({ team1, team2, date, venue, team1Probable, team2Probable });
   await match.save();
   res.redirect('/dashboard');
 });
@@ -205,7 +213,11 @@ router.post('/matches', isAuthenticated, async (req, res) => {
 // Edit Match Page
 router.get('/matches/:id/edit', isAuthenticated, async (req, res) => {
   const match = await Match.findById(req.params.id);
-  res.render('edit-match', { match });
+  res.render('edit-match', { match,
+      title: 'Edit New Match',
+      activePage: "editMatch",
+      message: ""
+   });
 });
 
 // Update Match Handler

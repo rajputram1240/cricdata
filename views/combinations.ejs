@@ -1,118 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Combination</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      display: flex;
-      height: 100vh;
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
-
-    .sidebar {
-      width: 250px;
-      background-color: #212529;
-      color: #ffffff;
-      padding: 20px;
-      position: fixed;
-      height: 100%;
-      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    }
-
-    .sidebar h2 {
-      font-size: 1.5rem;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
-    .sidebar a {
-      color: #adb5bd;
-      text-decoration: none;
-      display: block;
-      margin: 10px 0;
-      padding: 10px;
-      border-radius: 4px;
-      transition: background-color 0.3s, color 0.3s;
-    }
-
-    .sidebar a:hover {
-      background-color: #495057;
-      color: #ffffff;
-    }
-
-    .content {
-      margin-left: 250px;
-      width: calc(100% - 250px);
-      padding: 20px;
-      background-color: #f8f9fa;
-    }
-
-    .content h2 {
-      margin-bottom: 20px;
-      font-size: 1.8rem;
-      font-weight: bold;
-    }
-
-    .card {
-      border: none;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    .card img {
-      border-radius: 4px;
-    }
-
-    .approve-button {
-      background-color: #28a745;
-      color: #ffffff;
-      border: none;
-      transition: background-color 0.3s;
-    }
-
-    .approve-button:hover {
-      background-color: #218838;
-    }
-    .reject-button {
-      background-color: #dc3545;
-      color: #ffffff;
-      border: none;
-      transition: background-color 0.3s;
-    }
-
-    .reject-button:hover {
-      background-color: #c82333;
-    }
-
-    .btn-group {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-    }
-  </style>
-</head>
+  <%- include('partials/admin_header', { activePage: activePage }) %>
 <body>
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <h2>Admin Panel</h2>
-    <a href="/dashboard">Dashboard</a>
-    <a href="/matches/new">Add New Match</a>
-    <a href="/combinations/pending">Team Combinations</a>
-    <a href="/logout">Logout</a>
-  </div>
+  <%- include('partials/adm_sdbar', { activePage: activePage }) %>
 
   <!-- Main Content -->
   <div class="content">
-    <h2>Pending Team Combinations</h2>
+    <h2 class="text-center">Pending Team Combinations</h2>
     <div class="row">
       <% combinations.forEach(combination => { %>
         <div class="col-md-4 col-sm-6 mb-4">
@@ -130,7 +24,7 @@
       <% }); %>
     </div>
   </div>
-
+  <%- include('partials/admin_footer', { year: new Date().getFullYear() }) %>
   <script>
     // Approve button functionality
     document.querySelectorAll('.approve-button').forEach(button => {

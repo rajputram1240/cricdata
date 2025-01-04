@@ -163,13 +163,13 @@ router.post('/postCombination', isAuthenticatedUser,upload.single('image'), (req
   
     let combinations;
     if (filter === 'newest') {
-      combinations = await FantasyCombination.find({ matchId,approved: "approved" }).populate('userId').sort({ createdAt: -1 });
+      combinations = await FantasyCombination.find({ matchId,approved: { $ne: "rejected" }}).populate('userId').sort({ createdAt: -1 });
     } else if (filter === 'oldest') {
-      combinations = await FantasyCombination.find({ matchId,approved: "approved" }).populate('userId').sort({ createdAt: 1 });
+      combinations = await FantasyCombination.find({ matchId,approved: { $ne: "rejected" }}).populate('userId').sort({ createdAt: 1 });
     } else if (filter === 'mostLikes') {
-      combinations = await FantasyCombination.find({ matchId,approved: "approved" }).populate('userId').sort({ 'likes.length': -1 });
+      combinations = await FantasyCombination.find({ matchId,approved: { $ne: "rejected" } }).populate('userId').sort({ 'likes.length': -1 });
     } else if (filter === 'mostComments') {
-      combinations = await FantasyCombination.find({ matchId, approved: "approved" }).populate('userId').sort({ 'comments.length': -1 });
+      combinations = await FantasyCombination.find({ matchId, approved: { $ne: "rejected" } }).populate('userId').sort({ 'comments.length': -1 });
     }
     
     res.render('fantasyDetails', { 
@@ -202,7 +202,24 @@ router.post('/postCombination', isAuthenticatedUser,upload.single('image'), (req
   router.get('/combinations/pending', isAuthenticated, async (req, res) => {
     try {
       const pendingCombinations = await FantasyCombination.find({ approved: "pending" });
-      res.render('combinations', { combinations: pendingCombinations });
+      res.render('combinations', { combinations: pendingCombinations,
+        title: 'pending combinations',
+    activePage: "pending",
+    message: ""
+       });
+    } catch (error) {
+      res.status(500).send('Error fetching pending combinations.');
+    }
+  });
+
+  router.get('/combinations/all', isAuthenticated, async (req, res) => {
+    try {
+      const allcombinations = await FantasyCombination.find();
+      res.render('allcombinations', { combinations: allcombinations,
+        title: 'all combinations',
+    activePage: "allcombinations",
+    message: ""
+       });
     } catch (error) {
       res.status(500).send('Error fetching pending combinations.');
     }
