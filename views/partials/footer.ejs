@@ -2,6 +2,16 @@
 <div class="footer">
     <p>© <%= year %> Cricket Portal. All rights reserved. | <a href="#">Privacy Policy</a></p>
   </div>
+  <script>
+    function togglePlayerStats(playerId) {
+      const stats = document.getElementById(playerId);
+      if (stats.style.display === "none") {
+        stats.style.display = "block";
+      } else {
+        stats.style.display = "none";
+      }
+    }
+  </script>    
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Select2 JS -->

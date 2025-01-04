@@ -1,5 +1,7 @@
 .env
 demo.js
+data.js
+data1.js
 matchurl.js
 node_modules/
 security/

@@ -171,12 +171,16 @@ router.post('/postCombination', isAuthenticatedUser,upload.single('image'), (req
     } else if (filter === 'mostComments') {
       combinations = await FantasyCombination.find({ matchId, approved: { $ne: "rejected" } }).populate('userId').sort({ 'comments.length': -1 });
     }
+
+    console.log(match.venueData[0]);
     
     res.render('fantasyDetails', { 
       title: 'Fantasy Discussion',
       activePage: "fantasy",
       filter,
       match,
+      venueData:(match.venueData[0])?match.venueData[0]:[],
+      h2hData:(match.h2hData[0])?match.h2hData[0]:[],
       matchId, combinations });
   });
   

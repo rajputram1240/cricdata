@@ -204,8 +204,8 @@ router.get('/matches/new', isAuthenticated, (req, res) => {
 
 // Add Match Handler
 router.post('/matches', isAuthenticated, async (req, res) => {
-  const { team1, team2, date, venue,team1Probable, team2Probable } = req.body;
-  const match = new Match({ team1, team2, date, venue, team1Probable, team2Probable });
+  const { team1, team2, date, venue,team1Probable, team2Probable,team1Squad,team2Squads } = req.body;
+  const match = new Match({ team1, team2, date, venue, team1Probable, team2Probable,team1Squad,team2Squads });
   await match.save();
   res.redirect('/dashboard');
 });
@@ -222,8 +222,8 @@ router.get('/matches/:id/edit', isAuthenticated, async (req, res) => {
 
 // Update Match Handler
 router.post('/matches/:id', isAuthenticated, async (req, res) => {
-  const { team1, team2, date, venue } = req.body;
-  await Match.findByIdAndUpdate(req.params.id, { team1, team2, date, venue });
+  const { team1, team2, date, venue,team1Squad,team2Squads,team1Probable, team2Probable } = req.body;
+  await Match.findByIdAndUpdate(req.params.id, { team1, team2, date, venue,team1Squad,team2Squads,team1Probable, team2Probable,h2hData:{},venueData: {} });
   res.redirect('/dashboard');
 });
 

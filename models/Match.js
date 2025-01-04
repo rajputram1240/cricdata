@@ -13,6 +13,20 @@ const MatchSchema = new mongoose.Schema({
     type: [String],
     required: true,
   },
+  team1Squad: {
+    type: [String], 
+    required: true,
+  },
+  team2Squads: {
+    type: [String], 
+    required: true,
+  },
+  venueData: {
+    type: [Object]
+  },
+  h2hData: {
+    type: [Object]
+  },
   createdAt: {
     type: Date,
     default: Date.now,

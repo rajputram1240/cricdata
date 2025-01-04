@@ -86,6 +86,31 @@
                 > <%= match.team2Probable %></textarea>
                 <div class="invalid-feedback">Please provide the probable XI for Team 2.</div>
               </div>
+
+              <div class="mb-3">
+                <label for="team1Probable" class="form-label">Team 1 Squad</label>
+                <textarea 
+                  id="team1Squad" 
+                  name="team1Squad" 
+                  class="form-control" 
+                  rows="3" 
+                  placeholder="Enter players separated by commas" 
+                  required
+                ><%= match.team1Squad %></textarea>
+                <div class="invalid-feedback">Please provide the Squad for Team 1.</div>
+              </div>
+              <div class="mb-3">
+                <label for="team2Probable" class="form-label">Team 2 Squad</label>
+                <textarea 
+                  id="team2Squads" 
+                  name="team2Squads" 
+                  class="form-control" 
+                  rows="3" 
+                  placeholder="Enter players separated by commas" 
+                  required
+                ><%= match.team2Squads %></textarea>
+                <div class="invalid-feedback">Please provide Squad for Team 2.</div>
+              </div>
               <button type="submit" class="btn btn-success w-100">Update Match</button>
             </form>
           </div>

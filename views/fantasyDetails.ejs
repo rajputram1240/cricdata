@@ -244,6 +244,16 @@ h5 {
           Probable Playing XI
         </button>
       </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="venueData-tab" data-bs-toggle="tab" data-bs-target="#venueData-tab-pane" type="button" role="tab" aria-controls="venueData-tab-pane" aria-selected="false">
+         Player Performance By Venue
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="h2hData-tab" data-bs-toggle="tab" data-bs-target="#h2hData-tab-pane" type="button" role="tab" aria-controls="h2hData-tab-pane" aria-selected="false">
+         Player Performance By H2H
+        </button>
+      </li>      
     </ul>
 
     <div class="tab-content" id="matchTabsContent">
@@ -307,6 +317,79 @@ h5 {
           </ul>
         </div>
       </div>
+      
+      <div class="tab-pane fade" id="venueData-tab-pane" role="tabpanel" aria-labelledby="venueData-tab">
+        <div class="mt-4">
+          <% Object.entries(venueData).forEach(function([key, player]) { %>
+            <div class="match-card">
+              <h5>
+                <a href="javascript:void(0);" onclick="togglePlayerStats('<%= key.replace(/\s+/g, '') %>Stats')">
+                  <%= key %>
+                </a>
+              </h5>
+              <div id="<%= key.replace(/\s+/g, '') %>Stats" style="display:none;">
+              <% player.forEach(performance => { %>
+                <div class="table-responsive">
+                  <table class="table table-bordered">
+                    <thead>
+                      <tr>
+                        <% Object.keys(performance).forEach(key => { %>
+                          <th><%= key %></th>
+                        <% }); %>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <% Object.values(performance).forEach(value => { %>
+                          <td><%= value %></td>
+                        <% }); %>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              <% }); %>
+            </div>
+            </div>
+          <% }); %>
+        </div>
+      </div>      
+
+      <div class="tab-pane fade" id="h2hData-tab-pane" role="tabpanel" aria-labelledby="h2hData-tab">
+        <div class="mt-4">
+          <% Object.entries(h2hData).forEach(function([key, player]) { %>
+            <div class="match-card">
+              <h5>
+                <a href="javascript:void(0);" onclick="togglePlayerStats('<%= key.replace(/\s+/g, '') %>Stats')">
+                  <%= key %>
+                </a>
+              </h5>
+              <div id="<%= key.replace(/\s+/g, '') %>Stats" style="display:none;">
+                <% player.forEach(function(performance) { %>
+                  <div class="table-responsive">
+                    <table class="table table-bordered">
+                      <thead>
+                        <tr>
+                          <% Object.keys(performance).forEach(function(key) { %>
+                            <th><%= key %></th>
+                          <% }); %>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <% Object.values(performance).forEach(function(value) { %>
+                            <td><%= value %></td>
+                          <% }); %>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                <% }); %>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+          
     </div>
   </div>
 
