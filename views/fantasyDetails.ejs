@@ -359,11 +359,11 @@ h5 {
           <% Object.entries(h2hData).forEach(function([key, player]) { %>
             <div class="match-card">
               <h5>
-                <a href="javascript:void(0);" onclick="togglePlayerStats('<%= key.replace(/\s+/g, '') %>Stats')">
+                <a href="javascript:void(0);" onclick="togglePlayerStats('<%= key.replace(/\s+/g, '') %>Statsh2h')">
                   <%= key %>
                 </a>
               </h5>
-              <div id="<%= key.replace(/\s+/g, '') %>Stats" style="display:none;">
+              <div id="<%= key.replace(/\s+/g, '') %>Statsh2h" style="display:none;">
                 <% player.forEach(function(performance) { %>
                   <div class="table-responsive">
                     <table class="table table-bordered">
