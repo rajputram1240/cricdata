@@ -66,19 +66,84 @@ h1 {
   font-weight: 700;
 }
 
+/* Match Card Styling */
 .match-card {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  padding: 20px;
-  background-color: #fff;
-  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.1);
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 10px 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+.match-card h5 {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #007bff;
+}
+
+.match-card h6, .match-card h7 {
+  color: #007bff;
+  font-weight: 600;
+}
+
+.match-card p {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* Text Color for Batting/Bowling Headers */
+.text-info {
+  font-size: 1.2rem;
+}
+
+/* Button Styling for View More */
+.btn-link {
+  text-decoration: none;
+  color: #28a745;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.btn-link:hover {
+  color: #218838;
+}
+
+/* Full Details Section */
+.details-section {
+  margin-top: 10px;
+  background-color: #f1f1f1;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+/* Card Hover Effects */
 .match-card:hover {
-  transform: scale(1.03);
-  box-shadow: 0 8px 16px rgba(0, 123, 255, 0.3);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+  .match-card {
+    padding: 10px;
+  }
+
+  .match-card h5 {
+    font-size: 1.1rem;
+  }
+
+  .btn-info {
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .match-card {
+    padding: 5px;
+  }
+
+  .match-card h5 {
+    font-size: 1rem;
+  }
 }
 
 .footer {
@@ -210,6 +275,7 @@ h5 {
       <% if (matches.length > 0) { %>
         <% matches.forEach(match => { %>
           <div class="match-card">
+
             <h5><%= match.matchInfo.team1 %> vs <%= match.matchInfo.team2 %></h5>
             <p><strong>League:</strong> <%= match.matchInfo.league %></p>
             <p><strong>Match Date:</strong> <%= new Date(match.matchInfo.matchDate).toLocaleDateString() %></p>

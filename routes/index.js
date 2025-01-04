@@ -3,6 +3,45 @@ const router = express.Router();
 const Scorecard = require('../models/scorecard');
 const Team = require("../models/team");
 
+async function getPlayersWithRuns(scorecard, inningsIndex) {
+  return new Promise((resolve) => {
+      const playerIndices = scorecard[inningsIndex].data
+          .map((player, index) => parseInt(player.R) >= 20 ? index : -1)
+          .filter(index => index !== -1);
+
+      const players = playerIndices.map(index => {
+          const player = scorecard[inningsIndex].data[index];
+          return {
+              name: player.Batsman,
+              runs: player.R,
+              balls: player.Balls
+          };
+      });
+
+      resolve(players);
+  });
+}
+
+// Function to filter bowlers with wickets greater than or equal to 1
+async function getBowlersWithWickets(scorecard, inningsIndex) {
+  return new Promise((resolve) => {
+      const playerIndices = scorecard[inningsIndex].data
+          .map((player, index) => parseInt(player.W) >= 1 ? index : -1)
+          .filter(index => index !== -1);
+
+      const players = playerIndices.map(index => {
+          const player = scorecard[inningsIndex].data[index];
+          return {
+              name: player.Bowler,
+              over: player.O,
+              wicket: player.W
+          };
+      });
+
+      resolve(players);
+  });
+}
+
 router.get('/h2h',async (req,res)=> {
     const leagues = await Team.distinct("type");
     res.render('h2h',{
@@ -13,26 +52,64 @@ router.get('/h2h',async (req,res)=> {
     });
   })
   
-router.get('/head2head', async (req, res) => {
+  router.get('/head2head', async (req, res) => {
     const { team1, team2 } = req.query;
   
+    // Validation for missing teams
     if (!team1 || !team2) {
-      return res.status(400).json({ success: false, error: 'Please select team' });
+      return res.status(400).json({ success: false, error: 'Please select both teams' });
     }
   
     try {
-      const matches = await Scorecard.find({
-        $or: [
-          { "matchInfo.team1": team1, "matchInfo.team2": team2 },
-          { "matchInfo.team1": team2, "matchInfo.team2": team1 },
-        ]
-      });
-  
-      res.json(matches);
+        // Find matches where both teams played
+        const matches = await Scorecard.find({
+            $or: [
+                { "matchInfo.team1": team1, "matchInfo.team2": team2 },
+                { "matchInfo.team1": team2, "matchInfo.team2": team1 },
+            ]
+        });
+
+        let modifiedMatches1 = [];
+
+        // Process each match asynchronously
+        const modifiedMatches = await Promise.all(matches.map(async (match) => {
+            const inningsPromises = [
+                getPlayersWithRuns(match.scoreCard, 0), // 1st innings batting
+                getPlayersWithRuns(match.scoreCard, 2), // 2nd innings batting
+                getBowlersWithWickets(match.scoreCard, 1), // 1st innings bowling
+                getBowlersWithWickets(match.scoreCard, 3)  // 2nd innings bowling
+            ];
+
+            const [
+                playersWithRuns1, 
+                playersWithRuns2, 
+                playersWithWickets1, 
+                playersWithWickets2
+            ] = await Promise.all(inningsPromises);
+            console.log("playersWithRuns1, playersWithRuns2, playersWithWickets1,playersWithWickets2",playersWithRuns1, 
+              playersWithRuns2, 
+              playersWithWickets1, 
+              playersWithWickets2)
+            // Add modified scorecard data for this match
+            modifiedMatches1.push({
+              batting: {
+                  "1st innings": playersWithRuns1,
+                  "2nd innings": playersWithRuns2
+              },
+              bowling: {
+                  "1st innings": playersWithWickets1,
+                  "2nd innings": playersWithWickets2
+              }
+          });
+            return match;
+        }));
+        // Send response with the modified matches
+        res.json({modifiedMatches,modifiedMatches1});
     } catch (error) {
-      res.status(400).json({ success: false, error: error.message });
+        // Handle any errors
+        res.status(400).json({ success: false, error: error.message });
     }
-  });
+});
 
   router.get('/league', async (req, res) => {
     try {
