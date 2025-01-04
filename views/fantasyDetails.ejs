@@ -323,7 +323,7 @@ h5 {
           <% Object.entries(venueData).forEach(function([key, player]) { %>
             <div class="match-card">
               <h5>
-                <a href="javascript:void(0);" onclick="togglePlayerStats('<%= key.replace(/\s+/g, '') %>Stats')">
+                <a href="javascript:void(0);" onclick="togglePlayerStats(`<%= key.replace(/\s+/g, '') %>Stats`)">
                   <%= key %>
                 </a>
               </h5>
@@ -359,7 +359,7 @@ h5 {
           <% Object.entries(h2hData).forEach(function([key, player]) { %>
             <div class="match-card">
               <h5>
-                <a href="javascript:void(0);" onclick="togglePlayerStats('<%= key.replace(/\s+/g, '') %>Statsh2h')">
+                <a href="javascript:void(0);" onclick="togglePlayerStats(`<%= key.replace(/\s+/g, '') %>Statsh2h`)">
                   <%= key %>
                 </a>
               </h5>
@@ -397,48 +397,42 @@ h5 {
   <%- include('partials/footer', { year: new Date().getFullYear() }) %>
 
   <script>
-
-document.getElementById('filter-select').addEventListener('change', function() {
-  const selectedFilter = this.value;
-  window.location.href = `/fantasy/<%= matchId %>?filter=${selectedFilter}`;
-});
-
-// Toggle comments section visibility
-document.querySelectorAll('.comment-toggle').forEach(button => {
-      button.addEventListener('click', function() {
-        
-        const combinationId = this.getAttribute('data-combination-id');
-        const commentsSection = document.getElementById(`comments-${combinationId}`);
-        commentsSection.style.display = commentsSection.style.display === 'none' ? 'block' : 'none';
+    $(document).ready(function () {
+      // Filter selection change
+      $('#filter-select').on('change', function () {
+        const selectedFilter = $(this).val();
+        window.location.href = `/fantasy/<%= matchId %>?filter=${selectedFilter}`;
       });
-    });
-
-    // Handle like button click
-    document.querySelectorAll('.like-button').forEach(button => {
-      button.addEventListener('click', async function() {
-        const combinationId = this.getAttribute('data-combination-id');
+    
+      // Toggle comments section visibility
+      $('.comment-toggle').on('click', function () {
+        const combinationId = $(this).data('combination-id');
+        const commentsSection = $(`#comments-${combinationId}`);
+        commentsSection.toggle();
+      });
+    
+      // Handle like button click
+      $('.like-button').on('click', async function () {
+        const combinationId = $(this).data('combination-id');
         try {
           const response = await fetch(`/likeCombination/${combinationId}`, {
             method: 'POST',
           });
           const result = await response.json();
           if (result.success) {
-            const likeCount = this.querySelector('.like-count');
-            likeCount.textContent = result.likes;
+            $(this).find('.like-count').text(result.likes);
           }
         } catch (error) {
           console.error('Error:', error);
           alert('An error occurred while liking the combination.');
         }
       });
-    });
-
-    // Handle comment form submission
-    document.querySelectorAll('.comment-form').forEach(form => {
-      form.addEventListener('submit', async function(event) {
+    
+      // Handle comment form submission
+      $('.comment-form').on('submit', async function (event) {
         event.preventDefault();
-        const combinationId = this.getAttribute('data-combination-id');
-        const commentText = this.querySelector('input[name="comment"]').value;
+        const combinationId = $(this).data('combination-id');
+        const commentText = $(this).find('input[name="comment"]').val();
         try {
           const response = await fetch(`/commentCombination/${combinationId}`, {
             method: 'POST',
@@ -447,10 +441,10 @@ document.querySelectorAll('.comment-toggle').forEach(button => {
           });
           const result = await response.json();
           if (result.success) {
-            // Reload comments for this combination
-            const commentsSection = document.getElementById(`comments-${combinationId}`);
-            commentsSection.innerHTML += `<div class="comment"><p><strong>${result.username}:</strong> ${commentText}</p></div>`;
-            this.reset();
+            $(`#comments-${combinationId}`).append(
+              `<div class="comment"><p><strong>${result.username}:</strong> ${commentText}</p></div>`
+            );
+            $(this).trigger('reset');
           }
         } catch (error) {
           console.error('Error:', error);
@@ -458,7 +452,6 @@ document.querySelectorAll('.comment-toggle').forEach(button => {
         }
       });
     });
-  </script>
-
+    </script>    
 </body>
 </html>

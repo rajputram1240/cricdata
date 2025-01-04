@@ -123,17 +123,17 @@ router.get('/', (req, res) => {
   res.render('index', {
     title: 'Home',
     activePage: "home",
-    heroImage: 'https://source.unsplash.com/1600x900/?cricket',
+    heroImage: 'https://storage.googleapis.com/grandleagueguru/abcd.png',
     heroText: 'Welcome to Cricket Portal',
     cards: [
       {
-        image: 'https://source.unsplash.com/600x400/?stadium',
+        image: 'https://storage.googleapis.com/grandleagueguru/a123.png',
         title: 'Venue Matches',
         description: 'Explore matches grouped by venue and get detailed insights.',
         link: '/venue',
       },
       {
-        image: 'https://source.unsplash.com/600x400/?team',
+        image: 'https://storage.googleapis.com/grandleagueguru/a21.png',
         title: 'Head to Head',
         description: 'Analyze match history between your favorite teams.',
         link: '/h2h',
@@ -223,7 +223,7 @@ router.get('/matches/:id/edit', isAuthenticated, async (req, res) => {
 // Update Match Handler
 router.post('/matches/:id', isAuthenticated, async (req, res) => {
   const { team1, team2, date, venue,team1Squad,team2Squads,team1Probable, team2Probable } = req.body;
-  await Match.findByIdAndUpdate(req.params.id, { team1, team2, date, venue,team1Squad,team2Squads,team1Probable, team2Probable,h2hData:{},venueData: {} });
+  await Match.findByIdAndUpdate(req.params.id, { team1, team2, date, venue,team1Squad,team2Squads,team1Probable, team2Probable });
   res.redirect('/dashboard');
 });
 
