@@ -324,7 +324,9 @@ h5 {
             <div class="match-card">
               <h5>
                 <a href="javascript:void(0);" onclick="togglePlayerStats(`<%= key.replace(/\s+/g, '') %>Stats`)">
-                  <%= key %>
+                  <%= key.split('-')
+                  .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+                  .join(' ') %>
                 </a>
               </h5>
               <div id="<%= key.replace(/\s+/g, '') %>Stats" style="display:none;">
@@ -360,7 +362,9 @@ h5 {
             <div class="match-card">
               <h5>
                 <a href="javascript:void(0);" onclick="togglePlayerStats(`<%= key.replace(/\s+/g, '') %>Statsh2h`)">
-                  <%= key %>
+                  <%= key.split('-')
+                  .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+                  .join(' ') %>
                 </a>
               </h5>
               <div id="<%= key.replace(/\s+/g, '') %>Statsh2h" style="display:none;">

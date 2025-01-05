@@ -58,7 +58,15 @@ const scrapeMatchData = async (url) => {
           const columns = row.querySelectorAll('td');
           if (columns.length >= 3) {
             const temp = {};
-            columns.forEach((col, colIndex) => temp[header[colIndex]] = col.textContent.trim());
+            columns.forEach((col, colIndex) =>{
+              if(colIndex == 0){
+                const playerCell = col.querySelector('.la a');
+                const fullName = playerCell ? playerCell.getAttribute('href').split('/')[2].replace('-', ' ') : null;
+                temp[header[colIndex]] = fullName;
+              } else{
+                temp[header[colIndex]] = col.textContent.trim()
+              }
+            });
             tableData.push(temp);
           }
         });
