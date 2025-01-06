@@ -203,6 +203,24 @@ h5 {
     .team-list li:last-child {
       border-bottom: none;
     }
+
+    table {
+      margin: 20px 0;
+      background-color: #fff;
+      border: 1px solid #dee2e6;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    thead {
+      background-color: #343a40;
+      color: white;
+    }
+    th, td {
+      text-align: center;
+      padding: 15px;
+    }
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
   </style>
 <body>
   <!-- Include Navbar -->
@@ -325,6 +343,44 @@ h5 {
       
       <div class="tab-pane fade" id="venueData-tab-pane" role="tabpanel" aria-labelledby="venueData-tab">
         <div class="mt-4">
+          <h4 class="text-center">Players with 50+ Scores by venue</h1>
+          <div class="table-responsive">
+          <table class="table table-bordered table-hover">
+              <thead>
+                  <tr>
+                      <th>Player</th>
+                      <th>Number of 50+ Scores</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <% for (const player in fiftyPlusScoresvenue) { %>
+                      <tr>
+                          <td><%= player %></td>
+                          <td><%= fiftyPlusScoresvenue[player] %></td>
+                      </tr>
+                  <% } %>
+              </tbody>
+          </table>
+           </div>
+          <h4 class="text-center">Players with 3+ Wicket by venue</h1>
+          <div class="table-responsive">
+          <table class="table table-bordered table-hover">
+              <thead>
+                  <tr>
+                      <th>Player</th>
+                      <th>Number of 3+ Wicket</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <% for (const player in threePlusWktvenue) { %>
+                      <tr>
+                          <td><%= player %></td>
+                          <td><%= threePlusWktvenue[player] %></td>
+                      </tr>
+                  <% } %>
+              </tbody>
+          </table>
+        </div>
           <% Object.entries(venueData).forEach(function([key, player]) { %>
             <div class="match-card">
               <h5>
@@ -363,6 +419,44 @@ h5 {
 
       <div class="tab-pane fade" id="h2hData-tab-pane" role="tabpanel" aria-labelledby="h2hData-tab">
         <div class="mt-4">
+          <h4 class="text-center">Players with 50+ Scores by H2H</h1>
+          <div class="table-responsive">
+          <table class="table table-bordered table-hover">
+              <thead>
+                  <tr>
+                      <th>Player</th>
+                      <th>Number of 50+ Scores</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <% for (const player in fiftyPlusScoresh2h) { %>
+                      <tr>
+                          <td><%= player %></td>
+                          <td><%= fiftyPlusScoresh2h[player] %></td>
+                      </tr>
+                  <% } %>
+              </tbody>
+          </table>
+        </div>
+          <h4 class="text-center">Players with 3+ Wicket by H2H</h1>
+          <div class="table-responsive">
+          <table class="table table-bordered table-hover">
+              <thead>
+                  <tr>
+                      <th>Player</th>
+                      <th>Number of 3+ Wicket</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <% for (const player in threePlusWkth2h) { %>
+                      <tr>
+                          <td><%= player %></td>
+                          <td><%= threePlusWkth2h[player] %></td>
+                      </tr>
+                  <% } %>
+              </tbody>
+          </table>
+        </div>
           <% Object.entries(h2hData).forEach(function([key, player]) { %>
             <div class="match-card">
               <h5>
