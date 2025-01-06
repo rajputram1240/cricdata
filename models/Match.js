@@ -27,6 +27,14 @@ const MatchSchema = new mongoose.Schema({
   h2hData: {
     type: [Object]
   },
+  matchupData: {
+    type: Map,
+    of: {
+        type: Map,
+        of: Number  // This ensures the second map holds the count of each bowler against the batsman
+    },  // This allows nested maps to store bowler counts for each batsman
+    required: true
+  },
   createdAt: {
     type: Date,
     default: Date.now,

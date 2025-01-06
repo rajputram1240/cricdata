@@ -253,6 +253,11 @@ h5 {
         <button class="nav-link" id="h2hData-tab" data-bs-toggle="tab" data-bs-target="#h2hData-tab-pane" type="button" role="tab" aria-controls="h2hData-tab-pane" aria-selected="false">
          Player Performance By H2H
         </button>
+      </li>   
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="matchupData-tab" data-bs-toggle="tab" data-bs-target="#matchupData-tab-pane" type="button" role="tab" aria-controls="matchupData-tab-pane" aria-selected="false">
+         Player Match Up
+        </button>
       </li>      
     </ul>
 
@@ -391,6 +396,42 @@ h5 {
               </div>
             </div>
           <% }); %>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="matchupData-tab-pane" role="tabpanel" aria-labelledby="matchupData-tab">
+        <div class="mt-4">
+          <% for (const batsman in matchupData) { %>
+            <div class="match-card">
+              <h5>
+                <a href="javascript:void(0);" onclick="togglePlayerStats(`<%= batsman.replace(/\s+/g, '') %>matchupData`)">
+                  <%= batsman.split('-')
+                  .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+                  .join(' ') %>
+                </a>
+              </h5>
+              <div id="<%= batsman.replace(/\s+/g, '') %>matchupData" style="display:none;" >       
+                  <div class="table-responsive">
+                    <table class="table table-bordered">
+                      <thead>
+                        <tr>
+                         <th>Player Name</th>
+                         <th>Dismissal No</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% for (const bowler in matchupData[batsman]) { %>
+                        <tr>
+                            <td><%= bowler %></td>
+                            <td><%= matchupData[batsman][bowler] %></td>
+                        </tr>
+                        <% } %>
+                      </tbody>
+                    </table>
+                  </div>
+              </div>
+            </div>
+          <% }; %>
         </div>
       </div>
           

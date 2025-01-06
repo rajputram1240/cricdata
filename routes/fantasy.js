@@ -172,7 +172,12 @@ router.post('/postCombination', isAuthenticatedUser,upload.single('image'), (req
       combinations = await FantasyCombination.find({ matchId, approved: { $ne: "rejected" } }).populate('userId').sort({ 'comments.length': -1 });
     }
 
-    console.log(match.venueData[0]);
+    const matchupObject = Object.fromEntries(
+      Array.from(match.matchupData.entries()).map(([batsman, bowlers]) => [
+          batsman,
+          Object.fromEntries(bowlers)
+      ])
+  );
     
     res.render('fantasyDetails', { 
       title: 'Fantasy Discussion',
@@ -181,6 +186,7 @@ router.post('/postCombination', isAuthenticatedUser,upload.single('image'), (req
       match,
       venueData:(match.venueData[0])?match.venueData[0]:[],
       h2hData:(match.h2hData[0])?match.h2hData[0]:[],
+      matchupData:(matchupObject)?matchupObject:{},
       matchId, combinations });
   });
   
