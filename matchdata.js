@@ -26,7 +26,7 @@ const Scorecard = require('./models/scorecard');
     // Fetch players list
     const getPlayersList = async () => {
         try {
-            const match = await Match.findById({ _id: "677bc84e3de86a01990a9c8d" });
+            const match = await Match.findById({ _id: "677c2356289831b3848eaccf" });
             
             // Check if the match object and the required fields exist
             if (!match || !match.team1Squad || !match.team2Squads) {
@@ -38,8 +38,8 @@ const Scorecard = require('./models/scorecard');
     
             // Process and combine both teams' squads, trimming spaces and converting to lowercase
             let playersList = [
-                ...t1.map(name => name.trim().toLowerCase()),
-                ...t2.map(name => name.trim().toLowerCase())
+                t1.map(name => name.trim().toLowerCase()),
+                t2.map(name => name.trim().toLowerCase())
             ];
           
     
@@ -59,6 +59,7 @@ const Scorecard = require('./models/scorecard');
     
     try {
         const playersList = await getPlayersList(); // Fetch team squads
+        console.log(playersList);
         const scorecards = await getScorecards(); // Fetch scorecards
         const data1 = new Map(); // Use a Map to match the schema
     
@@ -69,11 +70,14 @@ const Scorecard = require('./models/scorecard');
     
                 data.forEach(entry => {
                     const playerName = entry.Batsman.toLowerCase();
-                    const haveBatsman = playersList.find(player => player.includes(playerName));
+                    const haveBatsman = playersList[0].find(player => player.includes(playerName));
+                    const haveBatsman1 = playersList[1].find(player => player.includes(playerName));
                     const dismissalWords = entry.Dismissal.split(" ");
-                    const bowlerName = getBowlerName(dismissalWords[dismissalWords.length - 1], playersList, bowlers);
+
+                    if(haveBatsman){
+                        const bowlerName = getBowlerName(dismissalWords[dismissalWords.length - 1], playersList[1], bowlers);
     
-                    if (haveBatsman && !dismissalWords.includes("(") && bowlerName) {
+                    if (!dismissalWords.includes("(") && bowlerName) {
                         if (!data1.has(haveBatsman)) {
                             data1.set(haveBatsman, new Map());
                         }
@@ -85,6 +89,23 @@ const Scorecard = require('./models/scorecard');
                         }
     
                         batsmanData.set(bowlerName, batsmanData.get(bowlerName) + 1);
+                    }
+                    } else if(haveBatsman1){
+                        const bowlerName = getBowlerName(dismissalWords[dismissalWords.length - 1], playersList[0], bowlers);
+    
+                        if (!dismissalWords.includes("(") && bowlerName) {
+                            if (!data1.has(haveBatsman1)) {
+                                data1.set(haveBatsman1, new Map());
+                            }
+        
+                            const batsmanData = data1.get(haveBatsman1);
+        
+                            if (!batsmanData.has(bowlerName)) {
+                                batsmanData.set(bowlerName, 0);
+                            }
+        
+                            batsmanData.set(bowlerName, batsmanData.get(bowlerName) + 1);
+                        }
                     }
                 });
             }
@@ -100,7 +121,7 @@ const Scorecard = require('./models/scorecard');
     
         // Update the document in MongoDB
         const updatedMatch = await Match.findByIdAndUpdate(
-            { _id: "677bc84e3de86a01990a9c8d" },
+            { _id: "677c2356289831b3848eaccf" },
             { matchupData: formattedData },
             { new: true }
         );

@@ -516,7 +516,9 @@ h5 {
                       <tbody>
                         <% for (const bowler in matchupData[batsman]) { %>
                         <tr>
-                            <td><%= bowler %></td>
+                            <td><%= bowler.split('-')
+                              .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+                              .join(' ') %></td>
                             <td><%= matchupData[batsman][bowler] %></td>
                         </tr>
                         <% } %>
