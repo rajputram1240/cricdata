@@ -4,43 +4,39 @@ const Scorecard = require('../models/scorecard');
 const Team = require("../models/team");
 
 async function getPlayersWithRuns(scorecard, inningsIndex) {
-  return new Promise((resolve) => {
-      const playerIndices = scorecard[inningsIndex].data
-          .map((player, index) => parseInt(player.R) >= 20 ? index : -1)
-          .filter(index => index !== -1);
+  if (!scorecard[inningsIndex] || !scorecard[inningsIndex].data) {
+      console.error(`Invalid or missing data at innings index ${inningsIndex}`);
+      return [];
+  }
 
-      const players = playerIndices.map(index => {
-          const player = scorecard[inningsIndex].data[index];
-          return {
-              name: player.Batsman,
-              runs: player.R,
-              balls: player.Balls
-          };
-      });
+  const players = scorecard[inningsIndex].data
+      .filter(player => parseInt(player.R) >= 20)
+      .map(player => ({
+          name: player.Batsman,
+          runs: player.R,
+          balls: player.Balls,
+      }));
 
-      resolve(players);
-  });
+  return players;
 }
 
-// Function to filter bowlers with wickets greater than or equal to 1
 async function getBowlersWithWickets(scorecard, inningsIndex) {
-  return new Promise((resolve) => {
-      const playerIndices = scorecard[inningsIndex].data
-          .map((player, index) => parseInt(player.W) >= 1 ? index : -1)
-          .filter(index => index !== -1);
+  if (!scorecard[inningsIndex] || !scorecard[inningsIndex].data) {
+      console.error(`Invalid or missing data at innings index ${inningsIndex}`);
+      return [];
+  }
 
-      const players = playerIndices.map(index => {
-          const player = scorecard[inningsIndex].data[index];
-          return {
-              name: player.Bowler,
-              over: player.O,
-              wicket: player.W
-          };
-      });
+  const players = scorecard[inningsIndex].data
+      .filter(player => parseInt(player.W) >= 1)
+      .map(player => ({
+          name: player.Bowler,
+          over: player.O,
+          wicket: player.W,
+      }));
 
-      resolve(players);
-  });
+  return players;
 }
+
 
 router.get('/h2h',async (req,res)=> {
     const leagues = await Team.distinct("type");
@@ -68,7 +64,7 @@ router.get('/h2h',async (req,res)=> {
                 { "matchInfo.team1": team2, "matchInfo.team2": team1 },
             ]
         });
-
+       
         let modifiedMatches1 = [];
 
         // Process each match asynchronously
@@ -86,11 +82,7 @@ router.get('/h2h',async (req,res)=> {
                 playersWithWickets1, 
                 playersWithWickets2
             ] = await Promise.all(inningsPromises);
-            console.log("playersWithRuns1, playersWithRuns2, playersWithWickets1,playersWithWickets2",playersWithRuns1, 
-              playersWithRuns2, 
-              playersWithWickets1, 
-              playersWithWickets2)
-            // Add modified scorecard data for this match
+            
             modifiedMatches1.push({
               batting: {
                   "1st innings": playersWithRuns1,
@@ -104,6 +96,8 @@ router.get('/h2h',async (req,res)=> {
             return match;
         }));
         // Send response with the modified matches
+
+        console.log({modifiedMatches,modifiedMatches1});
         res.json({modifiedMatches,modifiedMatches1});
     } catch (error) {
         // Handle any errors
