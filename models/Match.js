@@ -32,8 +32,7 @@ const MatchSchema = new mongoose.Schema({
     of: {
         type: Map,
         of: Number  // This ensures the second map holds the count of each bowler against the batsman
-    },  // This allows nested maps to store bowler counts for each batsman
-    required: true
+    }
   },
   batsman50h2h:{
     type: [Object]
