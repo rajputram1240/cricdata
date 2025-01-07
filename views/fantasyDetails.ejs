@@ -403,8 +403,15 @@ h5 {
                     </thead>
                     <tbody>
                       <tr>
-                        <% Object.values(performance).forEach(value => { %>
+                        <% Object.values(performance).forEach(function(value,index) { %>
+                          <% if (index ===  Object.values(performance).length - 1) { %>
+                           <td><a href="/scorecard/<%= value %>">
+                            <i class="bi bi-clipboard-data"></i>
+                           </a>
+                          </td> 
+                          <% } else { %>
                           <td><%= value %></td>
+                          <% } %>
                         <% }); %>
                       </tr>
                     </tbody>
@@ -479,8 +486,15 @@ h5 {
                       </thead>
                       <tbody>
                         <tr>
-                          <% Object.values(performance).forEach(function(value) { %>
+                          <% Object.values(performance).forEach(function(value,index) { %>
+                            <% if (index ===  Object.values(performance).length - 1) { %>
+                             <td><a href="/scorecard/<%= value %>">
+                              <i class="bi bi-clipboard-data"></i>
+                             </a>
+                            </td> 
+                            <% } else { %>
                             <td><%= value %></td>
+                            <% } %>
                           <% }); %>
                         </tr>
                       </tbody>
