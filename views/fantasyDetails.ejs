@@ -355,7 +355,9 @@ h5 {
               <tbody>
                   <% for (const player in fiftyPlusScoresvenue) { %>
                       <tr>
-                          <td><%= player %></td>
+                          <td><%= player.split('-')
+                            .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+                            .join(' ') %></td>
                           <td><%= fiftyPlusScoresvenue[player] %></td>
                       </tr>
                   <% } %>
@@ -374,7 +376,9 @@ h5 {
               <tbody>
                   <% for (const player in threePlusWktvenue) { %>
                       <tr>
-                          <td><%= player %></td>
+                          <td><%= player.split('-')
+                            .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+                            .join(' ') %></td>
                           <td><%= threePlusWktvenue[player] %></td>
                       </tr>
                   <% } %>
@@ -438,7 +442,9 @@ h5 {
               <tbody>
                   <% for (const player in fiftyPlusScoresh2h) { %>
                       <tr>
-                          <td><%= player %></td>
+                        <td><%= player.split('-')
+                          .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+                          .join(' ') %></td>
                           <td><%= fiftyPlusScoresh2h[player] %></td>
                       </tr>
                   <% } %>
@@ -457,7 +463,9 @@ h5 {
               <tbody>
                   <% for (const player in threePlusWkth2h) { %>
                       <tr>
-                          <td><%= player %></td>
+                        <td><%= player.split('-')
+                          .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+                          .join(' ') %></td>
                           <td><%= threePlusWkth2h[player] %></td>
                       </tr>
                   <% } %>
