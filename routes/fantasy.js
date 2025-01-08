@@ -178,36 +178,16 @@ router.post('/postCombination', isAuthenticatedUser,upload.single('image'), (req
           Object.fromEntries(bowlers)
       ])
   );
-
-  let fiftyPlusScoresvenue = match.batsman50venue.reduce((acc, batsman) => {
-    acc[batsman] = (acc[batsman] || 0) + 1;
-    return acc;
-}, {});
-
-let threePlusWktvenue = match.bowler3venue.reduce((acc, batsman) => {
-  acc[batsman] = (acc[batsman] || 0) + 1;
-  return acc;
-}, {});
-
-let fiftyPlusScoresh2h = match.batsman50h2h.reduce((acc, batsman) => {
-  acc[batsman] = (acc[batsman] || 0) + 1;
-  return acc;
-}, {});
-
-let threePlusWkth2h = match.bowler3h2h.reduce((acc, batsman) => {
-  acc[batsman] = (acc[batsman] || 0) + 1;
-  return acc;
-}, {});
-    
+    console.log(match.batsman50h2h);
     res.render('fantasyDetails', { 
       title: 'Fantasy Discussion',
       activePage: "fantasy",
       filter,
       match,
-      fiftyPlusScoresh2h,
-      fiftyPlusScoresvenue,
-      threePlusWkth2h,
-      threePlusWktvenue,
+      fiftyPlusScoresh2h: match.batsman50h2h[0],
+      fiftyPlusScoresvenue: match.batsman50venue[0],
+      threePlusWkth2h: match.bowler3h2h[0],
+      threePlusWktvenue: match.bowler3venue[0],
       venueData:(match.venueData[0])?match.venueData[0]:[],
       h2hData:(match.h2hData[0])?match.h2hData[0]:[],
       matchupData:(matchupObject)?matchupObject:{},

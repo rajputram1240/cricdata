@@ -358,7 +358,15 @@ h5 {
                           <td><%= player.split('-')
                             .map(part => part.charAt(0).toUpperCase() + part.slice(1))
                             .join(' ') %></td>
-                          <td><%= fiftyPlusScoresvenue[player] %></td>
+                          <td>
+                            <% fiftyPlusScoresvenue[player].forEach((player1,index) => { %>
+                              <% if (index ===  fiftyPlusScoresvenue[player].length - 1) { %>
+                                <a href="/scorecard/<%= player1[1] %>"><%= player1[0] %></a>
+                               <% } else { %>
+                                <a href="/scorecard/<%= player1[1] %>"><%= player1[0] %></a>,
+                               <% } %>
+                          <% }); %>
+                          </td>
                       </tr>
                   <% } %>
               </tbody>
@@ -379,7 +387,15 @@ h5 {
                           <td><%= player.split('-')
                             .map(part => part.charAt(0).toUpperCase() + part.slice(1))
                             .join(' ') %></td>
-                          <td><%= threePlusWktvenue[player] %></td>
+                          <td>
+                            <% threePlusWktvenue[player].forEach((player1,index) => { %>
+                              <% if (index ===  threePlusWktvenue[player].length - 1) { %>
+                                <a href="/scorecard/<%= player1[1] %>"><%= player1[0] %></a>
+                               <% } else { %>
+                                <a href="/scorecard/<%= player1[1] %>"><%= player1[0] %></a>,
+                               <% } %>
+                          <% }); %>
+                          </td>
                       </tr>
                   <% } %>
               </tbody>
@@ -445,7 +461,15 @@ h5 {
                         <td><%= player.split('-')
                           .map(part => part.charAt(0).toUpperCase() + part.slice(1))
                           .join(' ') %></td>
-                          <td><%= fiftyPlusScoresh2h[player] %></td>
+                          <td>
+                            <% fiftyPlusScoresh2h[player].forEach((player1,index) => { %>
+                              <% if (index ===  fiftyPlusScoresh2h[player].length - 1) { %>
+                                <a href="/scorecard/<%= player1[1] %>"><%= player1[0] %></a>
+                               <% } else { %>
+                                <a href="/scorecard/<%= player1[1] %>"><%= player1[0] %></a>,
+                               <% } %>
+                          <% }); %>
+                          </td>
                       </tr>
                   <% } %>
               </tbody>
@@ -466,7 +490,15 @@ h5 {
                         <td><%= player.split('-')
                           .map(part => part.charAt(0).toUpperCase() + part.slice(1))
                           .join(' ') %></td>
-                          <td><%= threePlusWkth2h[player] %></td>
+                          <td>
+                            <% threePlusWkth2h[player].forEach((player1,index) => { %>
+                              <% if (index ===  threePlusWkth2h[player].length - 1) { %>
+                                <a href="/scorecard/<%= player1[1] %>"><%= player1[0] %></a>
+                               <% } else { %>
+                                <a href="/scorecard/<%= player1[1] %>"><%= player1[0] %></a>,
+                               <% } %>
+                          <% }); %>
+                          </td>
                       </tr>
                   <% } %>
               </tbody>
