@@ -146,7 +146,7 @@ router.post('/postCombination', isAuthenticatedUser,upload.single('image'), (req
   // Route to get upcoming matches
   router.get('/matches', async (req, res) => {
     const matches = await Match.find().sort({ matchDate: 1 });
-   
+
     res.render('fantasy', { 
       title: 'Fantasy',
       activePage: "fantasy",
@@ -158,7 +158,9 @@ router.post('/postCombination', isAuthenticatedUser,upload.single('image'), (req
   router.get('/fantasy/:matchId', async (req, res) => {
     const { matchId } = req.params;
     const match = await Match.findById(matchId);
-  
+    if(!match){
+      return res.redirect('/matches');
+    }
      const filter = req.query.filter || 'newest';  // Default to 'newest'
   
     let combinations;
