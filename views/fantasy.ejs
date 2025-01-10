@@ -6,31 +6,34 @@
       background-color: #f0f4f8;
       font-family: 'Arial', sans-serif;
       padding-top: 70px;
+      margin: 0;
     }
-  
+
     .navbar {
       background: linear-gradient(90deg, #1e90ff, #4a90e2);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 15px;
     }
-  
+
     .navbar-brand {
       font-size: 1.8rem;
       font-weight: bold;
       color: #fff;
     }
-  
+
     h3 {
       color: #004aad;
       text-align: center;
       font-weight: bold;
       margin-bottom: 30px;
+      font-size: 2rem;
     }
-  
+
     .nav-tabs {
       border-bottom: 2px solid #ddd;
       justify-content: center;
     }
-  
+
     .nav-link {
       font-size: 1rem;
       font-weight: bold;
@@ -38,45 +41,46 @@
       margin: 0 5px;
       transition: all 0.3s ease;
     }
-  
+
     .nav-link:hover, .nav-link.active {
       color: #fff;
       background-color: #007bff;
       border-radius: 5px;
     }
-  
+
     .tab-pane {
       padding: 20px 0;
     }
-  
+
     .match-card {
       border: none;
       border-radius: 15px;
       background: linear-gradient(135deg, #1e90ff, #7da9db);
       color: #fff;
-      padding: 20px;
+      padding: 25px;
       margin-bottom: 20px;
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-  
+
     .match-card:hover {
       transform: translateY(-10px);
       box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
     }
-  
+
     .match-card h5 {
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       font-weight: bold;
       margin-bottom: 15px;
       text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+      letter-spacing: 1px;
     }
-  
+
     .match-card p {
-      font-size: 1rem;
+      font-size: 1.1rem;
       margin-bottom: 10px;
     }
-  
+
     .match-card .btn {
       background-color: #ffdd57;
       color: #333;
@@ -88,162 +92,175 @@
       text-transform: uppercase;
       transition: all 0.3s ease;
     }
-  
+
     .match-card .btn:hover {
       background-color: #ffc107;
       color: #000;
       transform: scale(1.1);
     }
-  
+
     .match-card .details-container {
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-  
+
     .match-card .team-logo {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-right: 15px;
-  overflow: hidden; /* Ensures that the image stays within the rounded container */
-}
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-right: 20px;
+      overflow: hidden;
+    }
 
-.match-card .team-logo img {
-  width: 100%;  /* Makes the image fill the entire container */
-  height: 100%; /* Ensures the image covers the entire height of the container */
-  object-fit: cover; /* Ensures the image aspect ratio is preserved and the image covers the container */
-}
+    .match-card .team-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
-  
     .match-card .team-info {
       display: flex;
       align-items: center;
     }
-  
+
     /* Responsive Styles */
+    @media (max-width: 1024px) {
+      h3 {
+        font-size: 1.6rem;
+        margin-bottom: 20px;
+      }
+
+      .match-card {
+        padding: 20px;
+      }
+    }
+
     @media (max-width: 768px) {
       .match-card {
         padding: 15px;
         margin-bottom: 15px;
       }
-  
+
       .match-card h5 {
-        font-size: 1.2rem;
+        font-size: 1.3rem;
       }
-  
+
       .match-card .btn {
         font-size: 0.9rem;
         padding: 8px 16px;
       }
-  
+
       .details-container {
         flex-direction: column;
         align-items: flex-start;
       }
-  
+
       .team-info {
         margin-bottom: 10px;
       }
     }
-  
+
     @media (max-width: 480px) {
       .match-card h5 {
         font-size: 1rem;
       }
-  
+
       .match-card .btn {
         font-size: 0.8rem;
         padding: 6px 12px;
       }
     }
-  </style>    
-<body>
-  <!-- Include Navbar -->
-  <%- include('partials/menu', { activePage: activePage }) %>
+  </style>
+  
+  <body>
+    <!-- Include Navbar -->
+    <%- include('partials/menu', { activePage: activePage }) %>
 
-  <div class="container">
-    <h3>SELECT A MATCH FOR FANTASY ANALYSIS</h3>
-    <% if (success_msg && success_msg !="") { %>
-      <div class="alert alert-success">
-        <%= success_msg %>
-      </div>
-    <% } %>
-    <% if (error_msg && error_msg !="") { %>
-      <div class="alert alert-danger">
-        <%= error_msg %>
-      </div>
-    <% } %>  
+    <div class="container">
+      <h3>SELECT A MATCH FOR FANTASY ANALYSIS</h3>
 
-    <% 
-      // Group matches by league
-      let matchesByLeague = {};
-      matches.forEach(match => {
-        if (!matchesByLeague[match.league]) {
-          matchesByLeague[match.league] = [];
-        }
-        matchesByLeague[match.league].push(match);
-      });
-    %>
-
-    <!-- Tabs for leagues -->
-    <ul class="nav nav-tabs" id="leagueTabs" role="tablist">
-      <% Object.keys(matchesByLeague).forEach((league, index) => { %>
-        <li class="nav-item">
-          <button 
-            class="nav-link <%= index === 0 ? 'active' : '' %>" 
-            id="<%= league.replace(/\s+/g, '') %>-tab" 
-            data-bs-toggle="tab" 
-            data-bs-target="#<%= league.replace(/\s+/g, '') %>" 
-            type="button" 
-            role="tab" 
-            aria-controls="<%= league.replace(/\s+/g, '') %>" 
-            aria-selected="<%= index === 0 ? 'true' : 'false' %>">
-            <%= league %>
-          </button>
-        </li>
-      <% }); %>
-    </ul>
-
-    <!-- Tab content -->
-    <div class="tab-content" id="leagueTabsContent">
-      <% Object.keys(matchesByLeague).forEach((league, index) => { %>
-        <div 
-          class="tab-pane fade <%= index === 0 ? 'show active' : '' %>" 
-          id="<%= league.replace(/\s+/g, '') %>" 
-          role="tabpanel" 
-          aria-labelledby="<%= league.replace(/\s+/g, '') %>-tab">
-          <% matchesByLeague[league].forEach(match => { %>
-            <div class="match-card">
-              <div class="details-container">
-                <div class="team-info">
-                  <div class="team-logo">
-                    <img src="https://storage.googleapis.com/grandleagueguru/<%= match.team1.replace(/\s+/g, '').toLowerCase() %>.png" alt="Team 1 Logo">
-                  </div>
-                  <h5><%= match.team1 %></h5>
-                </div>
-                <span>VS</span>
-                <div class="team-info">
-                  <div class="team-logo">
-                    <img src="https://storage.googleapis.com/grandleagueguru/<%= match.team2.replace(/\s+/g, '').toLowerCase() %>.png" alt="Team 2 Logo">
-                  </div>
-                  <h5><%= match.team2 %></h5>
-                </div>
-              </div>
-              <p><strong>Date:</strong> <%= new Date(match.date).toLocaleDateString() %></p>
-              <p><strong>Venue:</strong> <%= match.venue %></p>
-              <a class="btn" href="/fantasy/<%= match._id %>">Fantasy Analysis</a>
-            </div>  
-          <% }); %>
+      <% if (success_msg && success_msg != "") { %>
+        <div class="alert alert-success">
+          <%= success_msg %>
         </div>
-      <% }); %>
-    </div>
-  </div>
+      <% } %>
 
-  <!-- Include Footer -->
-  <%- include('partials/footer', { year: new Date().getFullYear() }) %>
-</body>
+      <% if (error_msg && error_msg != "") { %>
+        <div class="alert alert-danger">
+          <%= error_msg %>
+        </div>
+      <% } %>  
+
+      <% 
+        // Group matches by league
+        let matchesByLeague = {};
+        matches.forEach(match => {
+          if (!matchesByLeague[match.league]) {
+            matchesByLeague[match.league] = [];
+          }
+          matchesByLeague[match.league].push(match);
+        });
+      %>
+
+      <!-- Tabs for leagues -->
+      <ul class="nav nav-tabs" id="leagueTabs" role="tablist">
+        <% Object.keys(matchesByLeague).forEach((league, index) => { %>
+          <li class="nav-item">
+            <button 
+              class="nav-link <%= index === 0 ? 'active' : '' %>" 
+              id="<%= league.replace(/\s+/g, '') %>-tab" 
+              data-bs-toggle="tab" 
+              data-bs-target="#<%= league.replace(/\s+/g, '') %>" 
+              type="button" 
+              role="tab" 
+              aria-controls="<%= league.replace(/\s+/g, '') %>" 
+              aria-selected="<%= index === 0 ? 'true' : 'false' %>">
+              <%= league %>
+            </button>
+          </li>
+        <% }); %>
+      </ul>
+
+      <!-- Tab content -->
+      <div class="tab-content" id="leagueTabsContent">
+        <% Object.keys(matchesByLeague).forEach((league, index) => { %>
+          <div 
+            class="tab-pane fade <%= index === 0 ? 'show active' : '' %>" 
+            id="<%= league.replace(/\s+/g, '') %>" 
+            role="tabpanel" 
+            aria-labelledby="<%= league.replace(/\s+/g, '') %>-tab">
+            <% matchesByLeague[league].forEach(match => { %>
+              <div class="match-card">
+                <div class="details-container">
+                  <div class="team-info">
+                    <div class="team-logo">
+                      <img src="https://storage.googleapis.com/grandleagueguru/<%= match.team1.replace(/\s+/g, '').toLowerCase() %>.png" alt="Team 1 Logo">
+                    </div>
+                    <h5><%= match.team1 %></h5>
+                  </div>
+                  <span>VS</span>
+                  <div class="team-info">
+                    <div class="team-logo">
+                      <img src="https://storage.googleapis.com/grandleagueguru/<%= match.team2.replace(/\s+/g, '').toLowerCase() %>.png" alt="Team 2 Logo">
+                    </div>
+                    <h5><%= match.team2 %></h5>
+                  </div>
+                </div>
+                <p><strong>Date:</strong> <%= new Date(match.date).toLocaleDateString() %></p>
+                <p><strong>Venue:</strong> <%= match.venue %></p>
+                <a class="btn" href="/fantasy/<%= match._id %>">Fantasy Analysis</a>
+              </div>  
+            <% }); %>
+          </div>
+        <% }); %>
+      </div>
+    </div>
+
+    <!-- Include Footer -->
+    <%- include('partials/footer', { year: new Date().getFullYear() }) %>
+  </body>
 </html>
