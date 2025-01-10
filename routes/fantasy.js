@@ -160,9 +160,6 @@ router.post('/postCombination', isAuthenticatedUser,upload.single('image'), (req
   
     try {
       const match = await Match.findById(matchId);
-      if (!match) {
-        return res.redirect('/matches');
-      }
   
       const filter = req.query.filter || 'newest';  // Default to 'newest'
   
@@ -202,7 +199,7 @@ router.post('/postCombination', isAuthenticatedUser,upload.single('image'), (req
       });
     } catch (error) {
       console.error(error);
-      return res.status(500).send('Error retrieving match details');
+      return res.redirect('/matches');
     }
   });  
   
