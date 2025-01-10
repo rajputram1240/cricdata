@@ -1,33 +1,27 @@
 {
-  "name": "13_cricinfo_scrapper",
+  "name": "glg",
   "version": "1.0.0",
-  "main": "main.js",
+  "description": "��#\u0000 \u0000C\u0000r\u0000i\u0000c\u0000D\u0000a\u0000t\u0000a\u0000\r\u0000 \u0000",
+  "main": "data.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.21.2",
     "@google-cloud/storage": "^7.14.0",
     "axios": "^1.7.9",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.3",
-    "cheerio": "^1.0.0",
     "connect-flash": "^0.1.1",
     "cross-env": "^7.0.3",
     "dotenv": "^16.4.7",
     "ejs": "^3.1.10",
-    "express": "^4.21.2",
     "express-session": "^1.18.1",
     "mongoose": "^8.9.2",
-    "multer": "^1.4.5-lts.1",
-    "mysql2": "^3.12.0",
-    "p-limit": "^6.2.0",
-    "puppeteer": "^23.11.1",
-    "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2",
-    "request": "^2.88.2"
-  },
-  "description": ""
+    "multer": "^1.4.5-lts.1"
+  }
 }

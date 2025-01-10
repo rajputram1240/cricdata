@@ -26,7 +26,7 @@ const Scorecard = require('./models/scorecard');
     // Fetch players list
     const getPlayersList = async () => {
         try {
-            const match = await Match.findById({ _id: "677e4abcd2d2993aaa054344" });
+            const match = await Match.findById({ _id: "678164dd91f6cad8d77aa289" });
             
             // Check if the match object and the required fields exist
             if (!match || !match.team1Squad || !match.team2Squads) {
@@ -121,7 +121,7 @@ const Scorecard = require('./models/scorecard');
     
         // Update the document in MongoDB
         const updatedMatch = await Match.findByIdAndUpdate(
-            { _id: "677e4abcd2d2993aaa054344" },
+            { _id: "678164dd91f6cad8d77aa289" },
             { matchupData: formattedData },
             { new: true }
         );

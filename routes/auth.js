@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const Match = require("../models/Match")
+const Team = require("../models/team")
 const multer = require('multer');
 const bucket = require('../config/googleCloudStorage');
 const upload = multer({ storage: multer.memoryStorage() });
@@ -194,10 +195,12 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
 });
 
 // Add Match Page
-router.get('/matches/new', isAuthenticated, (req, res) => {
+router.get('/matches/new', isAuthenticated, async (req, res) => {
+  const leagues = await Team.distinct("type");
   res.render('add-match',{
     title: 'Add New Match',
     activePage: "AddMatch",
+    leagues,
     message: ""
   });
 });
@@ -213,7 +216,7 @@ router.post('/matches', isAuthenticated, async (req, res) => {
 // Edit Match Page
 router.get('/matches/:id/edit', isAuthenticated, async (req, res) => {
   const match = await Match.findById(req.params.id);
-  res.render('edit-match', { match,
+  res.render('edit-match', { match,leagues,
       title: 'Edit New Match',
       activePage: "editMatch",
       message: ""

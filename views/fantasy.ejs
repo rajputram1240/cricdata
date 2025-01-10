@@ -3,166 +3,170 @@
   <%- include('partials/header', { activePage: activePage }) %>
   <style>
     body {
-  background-color: #f7f7f7;
-  font-family: 'Arial', sans-serif;
-  padding-top: 70px;
-}
-
-/* Enhanced Navbar */
-.navbar {
-  background: linear-gradient(90deg, #007bff, #4a90e2);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.navbar-brand {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #fff;
+      background-color: #f0f4f8;
+      font-family: 'Arial', sans-serif;
+      padding-top: 70px;
+    }
+  
+    .navbar {
+      background: linear-gradient(90deg, #1e90ff, #4a90e2);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+  
+    .navbar-brand {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #fff;
+    }
+  
+    h3 {
+      color: #004aad;
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 30px;
+    }
+  
+    .nav-tabs {
+      border-bottom: 2px solid #ddd;
+      justify-content: center;
+    }
+  
+    .nav-link {
+      font-size: 1rem;
+      font-weight: bold;
+      color: #007bff;
+      margin: 0 5px;
+      transition: all 0.3s ease;
+    }
+  
+    .nav-link:hover, .nav-link.active {
+      color: #fff;
+      background-color: #007bff;
+      border-radius: 5px;
+    }
+  
+    .tab-pane {
+      padding: 20px 0;
+    }
+  
+    .match-card {
+      border: none;
+      border-radius: 15px;
+      background: linear-gradient(135deg, #1e90ff, #7da9db);
+      color: #fff;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+  
+    .match-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+    }
+  
+    .match-card h5 {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 15px;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+  
+    .match-card p {
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+  
+    .match-card .btn {
+      background-color: #ffdd57;
+      color: #333;
+      font-weight: bold;
+      border: none;
+      border-radius: 25px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+    }
+  
+    .match-card .btn:hover {
+      background-color: #ffc107;
+      color: #000;
+      transform: scale(1.1);
+    }
+  
+    .match-card .details-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  
+    .match-card .team-logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
   display: flex;
+  justify-content: center;
   align-items: center;
+  margin-right: 15px;
+  overflow: hidden; /* Ensures that the image stays within the rounded container */
 }
 
-.navbar-brand img {
-  width: 40px;
-  height: 40px;
-  margin-right: 10px;
+.match-card .team-logo img {
+  width: 100%;  /* Makes the image fill the entire container */
+  height: 100%; /* Ensures the image covers the entire height of the container */
+  object-fit: cover; /* Ensures the image aspect ratio is preserved and the image covers the container */
 }
 
-.navbar-nav .nav-link {
-  color: #fff;
-  font-weight: 600;
-  font-size: 1rem;
-  margin: 0 10px;
-  position: relative;
-}
-
-.navbar-nav .nav-link::after {
-  content: '';
-  width: 0;
-  height: 2px;
-  background: #ffdd57;
-  position: absolute;
-  bottom: -5px;
-  left: 50%;
-  transform: translateX(-50%);
-  transition: width 0.3s ease-in-out;
-}
-
-.navbar-nav .nav-link:hover::after,
-.navbar-nav .nav-link.active::after {
-  width: 100%;
-}
-
-.navbar-toggler {
-  border: none;
-  color: #fff;
-}
-
-h1 {
-  color: #007bff;
-  font-size: 2.5rem;
-  text-align: center;
-  margin-bottom: 40px;
-  font-weight: 700;
-}
-
-.match-card {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  padding: 20px;
-  background-color: #fff;
-  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.1);
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease;
-}
-
-.match-card:hover {
-  transform: scale(1.03);
-  box-shadow: 0 8px 16px rgba(0, 123, 255, 0.3);
-}
-
-.footer {
-  text-align: center;
-  margin-top: 40px;
-  font-size: 0.9rem;
-  color: #777;
-}
-
-
-.container {
-  margin-top: 30px;
-}
-h1, h3 {
-  color: #007bff;
-  text-align: center;
-  font-weight: bold;
-}
-.match-details {
-  background-color: #ffffff;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 6px 15px rgba(0, 123, 255, 0.1);
-  margin-bottom: 30px;
-}
-.btn-primary {
-  background-color: #007bff;
-  border: none;
-  padding: 12px 25px;
-  font-size: 18px;
-  font-weight: 600;
-  border-radius: 30px;
-  transition: all 0.3s ease;
-}
-.btn-primary:hover {
-  background-color: #0056b3;
-  transform: scale(1.05);
-}
-.table thead {
-  background-color: #007bff;
-  color: white;
-  border-radius: 8px;
-}
-.table th, .table td {
-  vertical-align: middle;
-  text-align: center;
-  padding: 12px;
-}
-h5 {
-  margin-top: 20px;
-  color: #28a745;
-  font-weight: 600;
-}
-.table-bordered {
-  border: 2px solid #dee2e6;
-  border-radius: 10px;
-  overflow: hidden;
-}
-.table-bordered th, .table-bordered td {
-  border: 1px solid #dee2e6;
-}
-.table tbody tr:hover {
-  background-color: #f1f1f1;
-  transition: all 0.3s ease;
-}
-.card-header {
-  background-color: #007bff;
-  color: white;
-  font-size: 1.2rem;
-  font-weight: 600;
-  padding: 10px 15px;
-  border-radius: 8px 8px 0 0;
-}
-.card-body {
-  padding: 20px;
-}
-  </style>
+  
+    .match-card .team-info {
+      display: flex;
+      align-items: center;
+    }
+  
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+      .match-card {
+        padding: 15px;
+        margin-bottom: 15px;
+      }
+  
+      .match-card h5 {
+        font-size: 1.2rem;
+      }
+  
+      .match-card .btn {
+        font-size: 0.9rem;
+        padding: 8px 16px;
+      }
+  
+      .details-container {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+  
+      .team-info {
+        margin-bottom: 10px;
+      }
+    }
+  
+    @media (max-width: 480px) {
+      .match-card h5 {
+        font-size: 1rem;
+      }
+  
+      .match-card .btn {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+      }
+    }
+  </style>    
 <body>
   <!-- Include Navbar -->
   <%- include('partials/menu', { activePage: activePage }) %>
 
   <div class="container">
-    <!-- Fantasy Match Selection -->
-    <h3>Select a match to discuss fantasy expertise</h3>
+    <h3>SELECT A MATCH FOR FANTASY ANALYSIS</h3>
     <% if (success_msg && success_msg !="") { %>
       <div class="alert alert-success">
         <%= success_msg %>
@@ -172,24 +176,70 @@ h5 {
       <div class="alert alert-danger">
         <%= error_msg %>
       </div>
-    <% } %>
-    <div id="matches">
-      <% if (matches.length > 0) { %>
-        <% matches.forEach(match => { %>
-          <div class="match-card card mb-4">
-            <div class="card-body">
-              <h5><%= match.team1 %> vs <%= match.team2 %></h5>
-              <p><strong>Match Date:</strong> <%= new Date(match.date).toLocaleDateString() %></p>
+    <% } %>  
+
+    <% 
+      // Group matches by league
+      let matchesByLeague = {};
+      matches.forEach(match => {
+        if (!matchesByLeague[match.league]) {
+          matchesByLeague[match.league] = [];
+        }
+        matchesByLeague[match.league].push(match);
+      });
+    %>
+
+    <!-- Tabs for leagues -->
+    <ul class="nav nav-tabs" id="leagueTabs" role="tablist">
+      <% Object.keys(matchesByLeague).forEach((league, index) => { %>
+        <li class="nav-item">
+          <button 
+            class="nav-link <%= index === 0 ? 'active' : '' %>" 
+            id="<%= league.replace(/\s+/g, '') %>-tab" 
+            data-bs-toggle="tab" 
+            data-bs-target="#<%= league.replace(/\s+/g, '') %>" 
+            type="button" 
+            role="tab" 
+            aria-controls="<%= league.replace(/\s+/g, '') %>" 
+            aria-selected="<%= index === 0 ? 'true' : 'false' %>">
+            <%= league %>
+          </button>
+        </li>
+      <% }); %>
+    </ul>
+
+    <!-- Tab content -->
+    <div class="tab-content" id="leagueTabsContent">
+      <% Object.keys(matchesByLeague).forEach((league, index) => { %>
+        <div 
+          class="tab-pane fade <%= index === 0 ? 'show active' : '' %>" 
+          id="<%= league.replace(/\s+/g, '') %>" 
+          role="tabpanel" 
+          aria-labelledby="<%= league.replace(/\s+/g, '') %>-tab">
+          <% matchesByLeague[league].forEach(match => { %>
+            <div class="match-card">
+              <div class="details-container">
+                <div class="team-info">
+                  <div class="team-logo">
+                    <img src="https://storage.googleapis.com/grandleagueguru/<%= match.team1.replace(/\s+/g, '').toLowerCase() %>.png" alt="Team 1 Logo">
+                  </div>
+                  <h5><%= match.team1 %></h5>
+                </div>
+                <span>VS</span>
+                <div class="team-info">
+                  <div class="team-logo">
+                    <img src="https://storage.googleapis.com/grandleagueguru/<%= match.team2.replace(/\s+/g, '').toLowerCase() %>.png" alt="Team 2 Logo">
+                  </div>
+                  <h5><%= match.team2 %></h5>
+                </div>
+              </div>
+              <p><strong>Date:</strong> <%= new Date(match.date).toLocaleDateString() %></p>
               <p><strong>Venue:</strong> <%= match.venue %></p>
-              <a class="btn btn-info" href="/fantasy/<%= match._id %>">
-                <i class="bi bi-bar-chart"></i> Analysis
-              </a>
-            </div>
-          </div>
-        <% }); %>
-      <% } else { %>
-        <p class="alert alert-warning">No matches found.</p>
-      <% } %>
+              <a class="btn" href="/fantasy/<%= match._id %>">Fantasy Analysis</a>
+            </div>  
+          <% }); %>
+        </div>
+      <% }); %>
     </div>
   </div>
 

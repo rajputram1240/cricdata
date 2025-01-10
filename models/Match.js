@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const MatchSchema = new mongoose.Schema({
+  league: { type: String, required: true },
   team1: { type: String, required: true },
   team2: { type: String, required: true },
   date: { type: Date, required: true },
