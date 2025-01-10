@@ -157,44 +157,54 @@ router.post('/postCombination', isAuthenticatedUser,upload.single('image'), (req
   // Route to get fantasy combinations for a match
   router.get('/fantasy/:matchId', async (req, res) => {
     const { matchId } = req.params;
-    const match = await Match.findById(matchId);
-    if(!match){
-      return res.redirect('/matches');
-    }
-     const filter = req.query.filter || 'newest';  // Default to 'newest'
   
-    let combinations;
-    if (filter === 'newest') {
-      combinations = await FantasyCombination.find({ matchId,approved: { $ne: "rejected" }}).populate('userId').sort({ createdAt: -1 });
-    } else if (filter === 'oldest') {
-      combinations = await FantasyCombination.find({ matchId,approved: { $ne: "rejected" }}).populate('userId').sort({ createdAt: 1 });
-    } else if (filter === 'mostLikes') {
-      combinations = await FantasyCombination.find({ matchId,approved: { $ne: "rejected" } }).populate('userId').sort({ 'likes.length': -1 });
-    } else if (filter === 'mostComments') {
-      combinations = await FantasyCombination.find({ matchId, approved: { $ne: "rejected" } }).populate('userId').sort({ 'comments.length': -1 });
-    }
-
-    const matchupObject = Object.fromEntries(
-      Array.from(match.matchupData.entries()).map(([batsman, bowlers]) => [
+    try {
+      const match = await Match.findById(matchId);
+      if (!match) {
+        return res.redirect('/matches');
+      }
+  
+      const filter = req.query.filter || 'newest';  // Default to 'newest'
+  
+      const sortOptions = {
+        newest: { createdAt: -1 },
+        oldest: { createdAt: 1 },
+        mostLikes: { 'likes.length': -1 },
+        mostComments: { 'comments.length': -1 },
+      };
+  
+      const combinations = await FantasyCombination.find({
+        matchId,
+        approved: { $ne: "rejected" }
+      }).populate('userId').sort(sortOptions[filter] || sortOptions.newest);
+  
+      const matchupObject = Object.fromEntries(
+        Array.from(match.matchupData.entries()).map(([batsman, bowlers]) => [
           batsman,
           Object.fromEntries(bowlers)
-      ])
-  );
-    console.log(match.batsman50h2h);
-    res.render('fantasyDetails', { 
-      title: 'Fantasy Discussion',
-      activePage: "fantasy",
-      filter,
-      match,
-      fiftyPlusScoresh2h: match.batsman50h2h[0],
-      fiftyPlusScoresvenue: match.batsman50venue[0],
-      threePlusWkth2h: match.bowler3h2h[0],
-      threePlusWktvenue: match.bowler3venue[0],
-      venueData:(match.venueData[0])?match.venueData[0]:[],
-      h2hData:(match.h2hData[0])?match.h2hData[0]:[],
-      matchupData:(matchupObject)?matchupObject:{},
-      matchId, combinations });
-  });
+        ])
+      );
+  
+      res.render('fantasyDetails', {
+        title: 'Fantasy Discussion',
+        activePage: "fantasy",
+        filter,
+        match,
+        fiftyPlusScoresHeadToHead: match.batsman50h2h[0] || [],
+        fiftyPlusScoresVenue: match.batsman50venue[0] || [],
+        threePlusWktsHeadToHead: match.bowler3h2h[0] || [],
+        threePlusWktsVenue: match.bowler3venue[0] || [],
+        venueData: match.venueData.length ? match.venueData[0] : [],
+        h2hData: match.h2hData.length ? match.h2hData[0] : [],
+        matchupData: matchupObject || {},
+        matchId,
+        combinations
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).send('Error retrieving match details');
+    }
+  });  
   
   
   router.post('/combinations/approve/:id', isAuthenticated, async (req, res) => {
