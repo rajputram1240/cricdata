@@ -3,7 +3,7 @@
   <%- include('partials/header', { activePage: activePage }) %>
   <style>
     body {
-      background-color: #f0f4f8;
+      background-color: #f9fafb;
       font-family: 'Arial', sans-serif;
       padding-top: 70px;
       margin: 0;
@@ -16,9 +16,10 @@
     }
 
     .navbar-brand {
-      font-size: 1.8rem;
+      font-size: 2rem;
       font-weight: bold;
       color: #fff;
+      text-transform: uppercase;
     }
 
     h3 {
@@ -36,10 +37,11 @@
     }
 
     .nav-link {
-      font-size: 1rem;
+      font-size: 1.1rem;
       font-weight: bold;
       color: #007bff;
-      margin: 0 5px;
+      margin: 0 15px;
+      padding: 10px;
       transition: all 0.3s ease;
     }
 
@@ -50,7 +52,7 @@
     }
 
     .tab-pane {
-      padding: 20px 0;
+      padding: 30px 15px;
     }
 
     .match-card {
@@ -59,9 +61,11 @@
       background: linear-gradient(135deg, #1e90ff, #7da9db);
       color: #fff;
       padding: 25px;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      flex-direction: column;
     }
 
     .match-card:hover {
@@ -89,9 +93,11 @@
       border: none;
       border-radius: 25px;
       padding: 10px 20px;
-      font-size: 1rem;
+      font-size: 1.1rem;
       text-transform: uppercase;
       transition: all 0.3s ease;
+      align-self: center;
+      margin-top: 15px;
     }
 
     .match-card .btn:hover {
@@ -138,12 +144,16 @@
       .match-card {
         padding: 20px;
       }
+
+      .match-card .btn {
+        font-size: 1rem;
+      }
     }
 
     @media (max-width: 768px) {
       .match-card {
         padding: 15px;
-        margin-bottom: 15px;
+        margin-bottom: 20px;
       }
 
       .match-card h5 {
@@ -163,11 +173,15 @@
       .team-info {
         margin-bottom: 10px;
       }
+
+      .match-card .btn {
+        width: 100%;
+      }
     }
 
     @media (max-width: 480px) {
       .match-card h5 {
-        font-size: 1rem;
+        font-size: 1.1rem;
       }
 
       .match-card .btn {
@@ -176,7 +190,7 @@
       }
     }
   </style>
-  
+
   <body>
     <!-- Include Navbar -->
     <%- include('partials/menu', { activePage: activePage }) %>

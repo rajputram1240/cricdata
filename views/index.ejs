@@ -1,60 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
   <%- include('partials/header', { activePage: activePage }) %>
+
   <style>
+    /* General Body Styling */
     body {
       background-color: #f8f9fa;
       font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
     }
+
+    /* Hero Section */
     .hero-section {
-  background: 
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), 
-    url('<%= heroImage %>') no-repeat center center/cover;
-  height: 300px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #fff;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
-}
+      background: 
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), 
+        url('<%= heroImage %>') no-repeat center center/cover;
+      height: 300px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+    }
 
     .hero-section h1 {
-      font-size: 3rem;
+      font-size: 2.5rem;
       font-weight: bold;
     }
+
+    /* Container for Cards */
     .container {
       margin-top: 30px;
     }
+
+    /* Card Styling */
     .card {
       border: none;
       border-radius: 10px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       transition: transform 0.3s;
+      margin-bottom: 20px;
     }
+
     .card:hover {
       transform: scale(1.05);
     }
+
     .card img {
-    width: 100%; /* Ensures the image spans the full width of the card */
-    height: 200px; /* Fix the height of the image */
-    object-fit: cover; /* Ensures the image maintains its aspect ratio and fills the space */
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-}
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+
+    /* Footer Styling */
     .footer {
       text-align: center;
-      margin-top: 40px;
       padding: 10px;
       background-color: #007bff;
       color: #fff;
     }
+
     .footer a {
       color: #ffdd57;
       text-decoration: none;
     }
 
-  /* Enhanced Navbar */
-  .navbar {
+    /* Navbar Styling */
+    .navbar {
       background: linear-gradient(90deg, #007bff, #4a90e2);
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
@@ -98,111 +113,88 @@
       width: 100%;
     }
 
-    .navbar-toggler {
-      border: none;
-      color: #fff;
-    }
-
-    .dropdown-menu {
-      background-color: #007bff;
-    }
-
-    .navbar .dropdown-item {
-      color: #fff;
-      font-weight: 600;
-    }
-
-    .navbar .dropdown-menu {
-      background-color: #2784ea; /* Light background for dropdown */
+    /* Dropdown Styling */
+    .nav-item .dropdown-menu {
+      background-color: #4593e1;
       border-radius: 0.375rem;
     }
 
-    .navbar .dropdown-item:hover {
+    .nav-item .dropdown-item:hover {
       background-color: #007bff;
       color: #fff;
     }
 
-    /* Navbar Styling */
-.navbar {
-  background: linear-gradient(90deg, #007bff, #4a90e2);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
+    .navbar-nav .nav-link.active {
+      color: #ffdd57 !important;
+    }
 
-.navbar-brand {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #fff;
-  display: flex;
-  align-items: center;
-}
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+      .hero-section h1 {
+        font-size: 2rem;
+      }
+    }
 
-.navbar-brand img {
-  width: 40px;
-  height: 40px;
-  margin-right: 10px;
-}
+    @media (max-width: 768px) {
+      .hero-section h1 {
+        font-size: 1.5rem;
+      }
 
-.navbar-nav .nav-link {
-  color: #fff;
-  font-weight: 600;
-  font-size: 1rem;
-  margin: 0 10px;
-  position: relative;
-}
+      .navbar-nav .nav-link {
+        font-size: 0.9rem;
+      }
 
-.navbar-nav .nav-link::after {
-  content: '';
-  width: 0;
-  height: 2px;
-  background: #ffdd57;
-  position: absolute;
-  bottom: -5px;
-  left: 50%;
-  transform: translateX(-50%);
-  transition: width 0.3s ease-in-out;
-}
+      .card img {
+        height: 180px;
+      }
+    }
 
-.navbar-nav .nav-link:hover::after,
-.navbar-nav .nav-link.active::after {
-  width: 100%;
-}
+    @media (max-width: 576px) {
+      .hero-section h1 {
+        font-size: 1.2rem;
+        text-align: center;
+      }
 
-/* Dropdown Styling */
-.nav-item .dropdown-menu {
-  background-color: #4593e1; /* Light background for dropdown */
-  border-radius: 0.375rem;
-}
+      .container {
+        margin-top: 15px;
+      }
 
-.nav-item .dropdown-item:hover {
-  background-color: #007bff;
-  color: #fff;
-}
+      .card img {
+        height: 150px;
+      }
 
-.navbar-nav .nav-link.active {
-  color: #ffdd57 !important;
-}
+      .navbar-brand {
+        font-size: 1.2rem;
+      }
 
-.btn-link {
-  color: #000;
-}
+      .navbar-nav .nav-link {
+        font-size: 0.8rem;
+        margin: 0 5px;
+      }
+
+      .footer {
+        font-size: 0.9rem;
+      }
+    }
   </style>
-<body>
-  <!-- Include Navbar -->
-  <%- include('partials/menu', { activePage: activePage }) %>
 
-  <!-- Include Hero Section -->
-  <%- include('partials/hero', { heroText: heroText, heroImage: heroImage }) %>
+  <body>
+    <!-- Include Navbar -->
+    <%- include('partials/menu', { activePage: activePage }) %>
 
-  <!-- Navigation Cards -->
-  <div class="container">
-    <div class="row">
-      <% cards.forEach(card => { %>
-        <%- include('partials/card', { card: card }) %>
-      <% }); %>
+    <!-- Hero Section -->
+    <%- include('partials/hero', { heroText: heroText, heroImage: heroImage }) %>
+
+    <!-- Navigation Cards -->
+    <div class="container">
+      <div class="row">
+        <% cards.forEach(card => { %>
+          <%- include('partials/card', { card: card }) %>
+        <% }); %>
+      </div>
     </div>
-  </div>
 
-  <!-- Include Footer -->
-  <%- include('partials/footer', { year: new Date().getFullYear() }) %>
-</body>
+    <!-- Footer -->
+    <%- include('partials/footer', { year: new Date().getFullYear() }) %>
+  </body>
 </html>
