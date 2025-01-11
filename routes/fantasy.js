@@ -181,6 +181,8 @@ router.post('/postCombination', isAuthenticatedUser,upload.single('image'), (req
           Object.fromEntries(bowlers)
         ])
       );
+
+      console.log(JSON.parse(match.team1Probable[0]));
   
       res.render('fantasyDetails', {
         title: 'Fantasy Discussion',

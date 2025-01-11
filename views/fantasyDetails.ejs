@@ -327,20 +327,63 @@ h5 {
       <!-- Probable Playing XI Tab -->
       <div class="tab-pane fade" id="probableXI-tab-pane" role="tabpanel" aria-labelledby="probableXI-tab">
         <div class="mt-4">
-          <h5><%= match.team1 %></h5>
-          <ul class="team-list">
-            <% match.team1Probable.forEach(player => { %>
-              <li><%= player %></li>
-            <% }); %>
-          </ul>
-          <h5 class="mt-4"><%= match.team2 %></h5>
-          <ul class="team-list">
-            <% match.team2Probable.forEach(player => { %>
-              <li><%= player %></li>
-            <% }); %>
-          </ul>
+          <!-- Team Lists -->
+          <div class="row">
+            <!-- Team 1 Probable XI -->
+            <div class="col-md-6 mb-4">
+              <h5 class="text-primary border-bottom pb-2"><%= match.team1 %> Probable XI</h5>
+              <div class="accordion mt-3" id="team1Accordion">
+                <% JSON.parse(match.team1Probable[0]).forEach((player, index) => { %>
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="team1Heading<%= index %>">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#team1Collapse<%= index %>" aria-expanded="false" aria-controls="team1Collapse<%= index %>">
+                        <%= player.name %>
+                      </button>
+                    </h2>
+                    <div id="team1Collapse<%= index %>" class="accordion-collapse collapse" aria-labelledby="team1Heading<%= index %>" data-bs-parent="#team1Accordion">
+                      <div class="accordion-body">
+                        <p><strong>Recent Scores:</strong> <span class="badge bg-secondary"><%= player.recentScores %></span></p>
+                        <p><strong>Average Fantasy Points:</strong> <span class="badge bg-info"><%= player.avgPoints %></span></p>
+                        <p><strong>Total Runs:</strong> <span class="badge bg-success"><%= player.totalRuns %></span></p>
+                        <% if (player.totalWickets) { %>
+                          <p><strong>Total Wickets:</strong> <span class="badge bg-danger"><%= player.totalWickets %></span></p>
+                        <% } %>
+                      </div>
+                    </div>
+                  </div>
+                <% }); %>
+              </div>
+            </div>
+      
+            <!-- Team 2 Probable XI -->
+            <div class="col-md-6 mb-4">
+              <h5 class="text-primary border-bottom pb-2"><%= match.team2 %> Probable XI</h5>
+              <div class="accordion mt-3" id="team2Accordion">
+                <% JSON.parse(match.team2Probable[0]).forEach((player, index) => { %>
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="team2Heading<%= index %>">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#team2Collapse<%= index %>" aria-expanded="false" aria-controls="team2Collapse<%= index %>">
+                        <%= player.name %>
+                      </button>
+                    </h2>
+                    <div id="team2Collapse<%= index %>" class="accordion-collapse collapse" aria-labelledby="team2Heading<%= index %>" data-bs-parent="#team2Accordion">
+                      <div class="accordion-body">
+                        <p><strong>Recent Scores:</strong> <span class="badge bg-secondary"><%= player.recentScores %></span></p>
+                        <p><strong>Average Fantasy Points:</strong> <span class="badge bg-info"><%= player.avgPoints %></span></p>
+                        <p><strong>Total Runs:</strong> <span class="badge bg-success"><%= player.totalRuns %></span></p>
+                        <% if (player.totalWickets) { %>
+                          <p><strong>Total Wickets:</strong> <span class="badge bg-danger"><%= player.totalWickets %></span></p>
+                        <% } %>
+                      </div>
+                    </div>
+                  </div>
+                <% }); %>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+       
       
       <div class="tab-pane fade" id="venueData-tab-pane" role="tabpanel" aria-labelledby="venueData-tab">
         <div class="mt-4">
