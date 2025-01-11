@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const PlayerSchema = require('./PlayerSchema');
 
 const MatchSchema = new mongoose.Schema({
   league: { type: String, required: true },
@@ -6,14 +7,8 @@ const MatchSchema = new mongoose.Schema({
   team2: { type: String, required: true },
   date: { type: Date, required: true },
   venue: { type: String, required: true },
-  team1Probable: {
-    type: [String], 
-    required: true,
-  },
-  team2Probable: {
-    type: [String],
-    required: true,
-  },
+  team1Probable: { type: [PlayerSchema], required: true }, // Array of Player objects
+  team2Probable: { type: [PlayerSchema], required: true }, // Array of Player objects
   team1Squad: {
     type: [String], 
     required: true,

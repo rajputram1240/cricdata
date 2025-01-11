@@ -182,7 +182,7 @@ router.post('/postCombination', isAuthenticatedUser,upload.single('image'), (req
         ])
       );
 
-      console.log(JSON.parse(match.team1Probable[0]));
+      console.log(match.team1Probable);
   
       res.render('fantasyDetails', {
         title: 'Fantasy Discussion',
@@ -201,7 +201,7 @@ router.post('/postCombination', isAuthenticatedUser,upload.single('image'), (req
       });
     } catch (error) {
       console.error(error);
-      return res.redirect('/matches');
+      res.status(500).json({ success: false, message: 'Error approving combination.' });
     }
   });  
   

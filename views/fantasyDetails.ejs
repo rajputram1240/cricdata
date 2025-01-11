@@ -333,7 +333,11 @@ h5 {
             <div class="col-md-6 mb-4">
               <h5 class="text-primary border-bottom pb-2"><%= match.team1 %> Probable XI</h5>
               <div class="accordion mt-3" id="team1Accordion">
-                <% JSON.parse(match.team1Probable[0]).forEach((player, index) => { %>
+                <% 
+                  // Ensure team1Probable is an array
+                  const team1Players = Array.isArray(match.team1Probable) ? match.team1Probable : [];
+                %>
+                <% team1Players.forEach((player, index) => { %>
                   <div class="accordion-item">
                     <h2 class="accordion-header" id="team1Heading<%= index %>">
                       <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#team1Collapse<%= index %>" aria-expanded="false" aria-controls="team1Collapse<%= index %>">
@@ -352,14 +356,18 @@ h5 {
                     </div>
                   </div>
                 <% }); %>
-              </div>
+              </div>              
             </div>
       
             <!-- Team 2 Probable XI -->
             <div class="col-md-6 mb-4">
               <h5 class="text-primary border-bottom pb-2"><%= match.team2 %> Probable XI</h5>
               <div class="accordion mt-3" id="team2Accordion">
-                <% JSON.parse(match.team2Probable[0]).forEach((player, index) => { %>
+                <% 
+                  // Ensure team1Probable is an array
+                  const team2Players = Array.isArray(match.team2Probable) ? match.team2Probable : [];
+                %>
+                <% team2Players.forEach((player, index) => { %>
                   <div class="accordion-item">
                     <h2 class="accordion-header" id="team2Heading<%= index %>">
                       <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#team2Collapse<%= index %>" aria-expanded="false" aria-controls="team2Collapse<%= index %>">
@@ -379,6 +387,7 @@ h5 {
                   </div>
                 <% }); %>
               </div>
+              
             </div>
           </div>
         </div>

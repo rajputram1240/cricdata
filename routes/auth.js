@@ -9,6 +9,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 const { isAuthenticatedUser,isAuthenticated } = require('../middlewares/auth');
 const crypto = require('crypto');
 const path = require('path');
+const { skipMiddlewareFunction } = require('mongoose');
 
 
 router.get('/register', (req, res) => {
@@ -208,15 +209,15 @@ router.get('/matches/new', isAuthenticated, async (req, res) => {
 // Add Match Handler
 router.post('/matches', isAuthenticated, async (req, res) => {
   const { team1, team2, date, venue,team1Probable, team2Probable,team1Squad,team2Squads } = req.body;
-  const match = new Match({ team1, team2, date, venue, team1Probable, team2Probable,team1Squad,team2Squads });
+  const match = new Match({ team1, team2, date, venue,team1Probable: JSON.parse(team1Probable), team2Probable: JSON.parse(team2Probable),team1Squad,team2Squads });
   await match.save();
   res.redirect('/dashboard');
 });
-
 // Edit Match Page
-router.get('/matches/:id/edit', isAuthenticated, async (req, res) => {
+router.get('/matches/:id/edit',isAuthenticated, async (req, res) => {
   const match = await Match.findById(req.params.id);
-  res.render('edit-match', { match,leagues,
+  
+  res.render('edit-match', { match,
       title: 'Edit New Match',
       activePage: "editMatch",
       message: ""
@@ -224,10 +225,27 @@ router.get('/matches/:id/edit', isAuthenticated, async (req, res) => {
 });
 
 // Update Match Handler
-router.post('/matches/:id', isAuthenticated, async (req, res) => {
-  const { team1, team2, date, venue,team1Squad,team2Squads,team1Probable, team2Probable } = req.body;
-  await Match.findByIdAndUpdate(req.params.id, { team1, team2, date, venue,team1Squad,team2Squads,team1Probable, team2Probable });
-  res.redirect('/dashboard');
+router.post('/matches/:id', async (req, res) => {
+  const { id } = req.params;
+  const { team1, team2, date, venue, team1Probable, team2Probable, team1Squad, team2Squads } = req.body;
+   
+  try {
+    const updatedMatch = await Match.findByIdAndUpdate(id, {
+      team1,
+      team2,
+      date: new Date(date),
+      venue,
+      team1Probable: JSON.parse(team1Probable),
+      team2Probable: JSON.parse(team2Probable),
+      team1Squad: team1Squad.split(',').map((p) => p.trim()),
+      team2Squads: team2Squads.split(',').map((p) => p.trim()),
+    }, { new: true });
+
+    res.redirect(`/matches/${updatedMatch._id}`);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error updating match');
+  }
 });
 
 // Delete Match Handler
