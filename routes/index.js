@@ -13,7 +13,7 @@ async function getPlayersWithRuns(scorecard, inningsIndex) {
       .filter(player => parseInt(player.R) >= 20)
       .map(player => ({
           name: player.Batsman.split('-')
-          .map(part => part.charAt(0).toUpperCase() + part.slice(1).toUpperCase())
+          .map(part => part.charAt(0).toUpperCase() + part.slice(1))
           .join(' '),
           runs: player.R,
           balls: player.Balls,
@@ -32,7 +32,7 @@ async function getBowlersWithWickets(scorecard, inningsIndex) {
       .filter(player => parseInt(player.W) >= 1)
       .map(player => ({
           name: player.Bowler.split('-')
-          .map(part => part.charAt(0).toUpperCase() + part.slice(1).toUpperCase())
+          .map(part => part.charAt(0).toUpperCase() + part.slice(1))
           .join(' '),
           over: player.O,
           wicket: player.W,
