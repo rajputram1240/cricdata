@@ -1,14 +1,20 @@
 const mongoose = require('mongoose');
-const PlayerSchema = require('./PlayerSchema');
 
+const playerSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  recentScores: { type: String, default:"NA"  },
+  avgPoints: { type: mongoose.Schema.Types.Mixed, default:"NA"  },
+  totalRuns: { type: mongoose.Schema.Types.Mixed, default:"NA" },
+  totalWickets: { type: mongoose.Schema.Types.Mixed, default:"NA" }
+});
 const MatchSchema = new mongoose.Schema({
-  league: { type: String, required: true },
+  league: { type: String, required: true, default: "Super Smash 2024-25" },
   team1: { type: String, required: true },
   team2: { type: String, required: true },
   date: { type: Date, required: true },
   venue: { type: String, required: true },
-  team1Probable: { type: [PlayerSchema], required: true }, // Array of Player objects
-  team2Probable: { type: [PlayerSchema], required: true }, // Array of Player objects
+  team1Probable: { type: [playerSchema], default:[] }, // Array of Player objects
+  team2Probable: { type: [playerSchema], default:[] }, // Array of Player objects
   team1Squad: {
     type: [String], 
     required: true,

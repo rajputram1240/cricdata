@@ -59,14 +59,14 @@ const Scorecard = require('./models/scorecard');
 
 
     try {
-        const matchId = "678164dd91f6cad8d77aa289";
+        const matchId = "6783e6518e609577476964ad";
         const match = await Match.findById(matchId);
         if (!match || !match.team1Squad || !match.team2Squads) throw new Error('Match data is incomplete.');
     
-        const playersList = match.team1Squad[0].split(',').map(name => name.trim().toLowerCase());
-        const playersList1 = match.team2Squads[0].split(',').map(name => name.trim().toLowerCase());
+        const playersList1 = match.team1Squad.map(name => name.trim().toLowerCase());
+        const playersList = match.team2Squads.map(name => name.trim().toLowerCase());
     
-        const scorecards = await getScorecards(match.team2);
+        const scorecards = await getScorecards(match.team1);
         
         const data1 = match.h2hData[0] || {};  // Fallback to an empty object if undefined
         const batsman50h2h = match.batsman50h2h[0] || {};  // Fallback to empty object if undefined

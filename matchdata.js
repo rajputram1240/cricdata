@@ -26,15 +26,15 @@ const Scorecard = require('./models/scorecard');
     // Fetch players list
     const getPlayersList = async () => {
         try {
-            const match = await Match.findById({ _id: "678164dd91f6cad8d77aa289" });
+            const match = await Match.findById({ _id: "6783e6518e609577476964ad" });
             
             // Check if the match object and the required fields exist
             if (!match || !match.team1Squad || !match.team2Squads) {
                 throw new Error("Match data is incomplete.");
             }
     
-            let t1 = match.team1Squad[0].split(",");
-            let t2 = match.team2Squads[0].split(",");
+            let t1 = match.team1Squad;
+            let t2 = match.team2Squads;
     
             // Process and combine both teams' squads, trimming spaces and converting to lowercase
             let playersList = [
@@ -121,7 +121,7 @@ const Scorecard = require('./models/scorecard');
     
         // Update the document in MongoDB
         const updatedMatch = await Match.findByIdAndUpdate(
-            { _id: "678164dd91f6cad8d77aa289" },
+            { _id: "6783e6518e609577476964ad" },
             { matchupData: formattedData },
             { new: true }
         );

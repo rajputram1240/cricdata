@@ -208,8 +208,8 @@ router.get('/matches/new', isAuthenticated, async (req, res) => {
 
 // Add Match Handler
 router.post('/matches', isAuthenticated, async (req, res) => {
-  const { team1, team2, date, venue,team1Probable, team2Probable,team1Squad,team2Squads } = req.body;
-  const match = new Match({ team1, team2, date, venue,team1Probable: JSON.parse(team1Probable), team2Probable: JSON.parse(team2Probable),team1Squad,team2Squads });
+  const { team1, team2, date, venue,team1Squad,team2Squads,league } = req.body;
+  const match = new Match({ team1, team2, date, venue,team1Squad,team2Squads,league });
   await match.save();
   res.redirect('/dashboard');
 });
@@ -227,21 +227,20 @@ router.get('/matches/:id/edit',isAuthenticated, async (req, res) => {
 // Update Match Handler
 router.post('/matches/:id', async (req, res) => {
   const { id } = req.params;
-  const { team1, team2, date, venue, team1Probable, team2Probable, team1Squad, team2Squads } = req.body;
+  const { team1, team2, date, venue, team1Squad, team2Squads,league } = req.body;
    
   try {
     const updatedMatch = await Match.findByIdAndUpdate(id, {
       team1,
       team2,
+      league,
       date: new Date(date),
       venue,
-      team1Probable: JSON.parse(team1Probable),
-      team2Probable: JSON.parse(team2Probable),
       team1Squad: team1Squad.split(',').map((p) => p.trim()),
       team2Squads: team2Squads.split(',').map((p) => p.trim()),
     }, { new: true });
 
-    res.redirect(`/matches/${updatedMatch._id}`);
+    res.redirect('/dashboard');
   } catch (err) {
     console.error(err);
     res.status(500).send('Error updating match');
