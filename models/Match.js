@@ -48,6 +48,9 @@ const MatchSchema = new mongoose.Schema({
   bowler3venue:{
     type: [Object]
   },  
+  playerProbability:{
+    type: [Object]
+  }, 
   createdAt: {
     type: Date,
     default: Date.now,

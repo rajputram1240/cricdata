@@ -258,6 +258,11 @@ h5 {
         </button>
       </li>
       <li class="nav-item" role="presentation">
+        <button class="nav-link" id="prediction-tab" data-bs-toggle="tab" data-bs-target="#prediction-tab-pane" type="button" role="tab" aria-controls="prediction-tab-pane" aria-selected="false">
+          Player Prediction
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
         <button class="nav-link" id="probableXI-tab" data-bs-toggle="tab" data-bs-target="#probableXI-tab-pane" type="button" role="tab" aria-controls="probableXI-tab-pane" aria-selected="false">
           Probable Playing XI
         </button>
@@ -323,6 +328,39 @@ h5 {
           </div>
         </div>
       </div>
+
+      <div class="tab-pane fade" id="prediction-tab-pane" role="tabpanel" aria-labelledby="prediction-tab">
+        <div class="mt-4">
+          <h4 class="text-center">Players Prediction</h1>
+          <div class="table-responsive">
+          <table class="table table-bordered table-hover">
+              <thead>
+                  <tr>
+                      <th>Player</th>
+                      <th>Probability(%) Performed Today</th>
+                  </tr>
+              </thead>
+              <tbody>
+                <% if (Array.isArray(playerProbability)) { %>
+                  <% playerProbability.forEach(data_player => { %>
+                    <tr>
+                      <td><%= data_player.player.split(' ')
+                        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+                        .join(' ') %>
+                      </td>
+                      <td><%= data_player.points %></td>
+                    </tr>
+                  <% }); %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="2">No player data available.</td>
+                  </tr>
+                <% } %>
+              </tbody>              
+          </table>
+           </div>
+        </div>
+      </div>    
 
       <!-- Probable Playing XI Tab -->
       <div class="tab-pane fade" id="probableXI-tab-pane" role="tabpanel" aria-labelledby="probableXI-tab">
@@ -396,13 +434,13 @@ h5 {
       
       <div class="tab-pane fade" id="venueData-tab-pane" role="tabpanel" aria-labelledby="venueData-tab">
         <div class="mt-4">
-          <h4 class="text-center">Players with 50+ Scores by venue</h1>
+          <h4 class="text-center">Players with 30+ Scores by venue</h1>
           <div class="table-responsive">
           <table class="table table-bordered table-hover">
               <thead>
                   <tr>
                       <th>Player</th>
-                      <th>Number of 50+ Scores</th>
+                      <th>Number of 30+ Scores</th>
                   </tr>
               </thead>
               <tbody>
@@ -425,13 +463,13 @@ h5 {
               </tbody>
           </table>
            </div>
-          <h4 class="text-center">Players with 3+ Wicket by venue</h1>
+          <h4 class="text-center">Players with 2+ Wicket by venue</h1>
           <div class="table-responsive">
           <table class="table table-bordered table-hover">
               <thead>
                   <tr>
                       <th>Player</th>
-                      <th>Number of 3+ Wicket</th>
+                      <th>Number of 2+ Wicket</th>
                   </tr>
               </thead>
               <tbody>
@@ -499,13 +537,13 @@ h5 {
 
       <div class="tab-pane fade" id="h2hData-tab-pane" role="tabpanel" aria-labelledby="h2hData-tab">
         <div class="mt-4">
-          <h4 class="text-center">Players with 50+ Scores by H2H</h1>
+          <h4 class="text-center">Players with 30+ Scores by H2H</h1>
           <div class="table-responsive">
           <table class="table table-bordered table-hover">
               <thead>
                   <tr>
                       <th>Player</th>
-                      <th>Number of 50+ Scores</th>
+                      <th>Number of 30+ Scores</th>
                   </tr>
               </thead>
               <tbody>
@@ -528,13 +566,13 @@ h5 {
               </tbody>
           </table>
         </div>
-          <h4 class="text-center">Players with 3+ Wicket by H2H</h1>
+          <h4 class="text-center">Players with 2+ Wicket by H2H</h1>
           <div class="table-responsive">
           <table class="table table-bordered table-hover">
               <thead>
                   <tr>
                       <th>Player</th>
-                      <th>Number of 3+ Wicket</th>
+                      <th>Number of 2+ Wicket</th>
                   </tr>
               </thead>
               <tbody>

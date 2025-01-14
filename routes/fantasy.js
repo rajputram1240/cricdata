@@ -182,7 +182,7 @@ router.post('/postCombination', isAuthenticatedUser,upload.single('image'), (req
         ])
       );
 
-      console.log(match.team1Probable);
+     console.log(match.playerProbability);
   
       res.render('fantasyDetails', {
         title: 'Fantasy Discussion',
@@ -195,6 +195,7 @@ router.post('/postCombination', isAuthenticatedUser,upload.single('image'), (req
         threePlusWktvenue: match.bowler3venue[0] || [],
         venueData: match.venueData.length ? match.venueData[0] : [],
         h2hData: match.h2hData.length ? match.h2hData[0] : [],
+        playerProbability: match.playerProbability.length ? match.playerProbability : [],
         matchupData: matchupObject || {},
         matchId,
         combinations
