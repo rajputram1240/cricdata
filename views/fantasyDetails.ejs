@@ -267,14 +267,14 @@ h5 {
           Probable Playing XI
         </button>
       </li>
-      <% if(venueData){ %>
+      <% if(venueData != []){ %>
       <li class="nav-item" role="presentation">
         <button class="nav-link" id="venueData-tab" data-bs-toggle="tab" data-bs-target="#venueData-tab-pane" type="button" role="tab" aria-controls="venueData-tab-pane" aria-selected="false">
          Player Performance By Venue
         </button>
       </li>
       <% } %>
-      <% if(h2hData){ %>
+      <% if(h2hData != []){ %>
       <li class="nav-item" role="presentation">
         <button class="nav-link" id="h2hData-tab" data-bs-toggle="tab" data-bs-target="#h2hData-tab-pane" type="button" role="tab" aria-controls="h2hData-tab-pane" aria-selected="false">
          Player Performance By H2H
@@ -435,7 +435,7 @@ h5 {
         </div>
       </div>
        
-      <% if(venueData){ %>
+      <% if(venueData != []){ %>
       <div class="tab-pane fade" id="venueData-tab-pane" role="tabpanel" aria-labelledby="venueData-tab">
         <div class="mt-4">
           <h4 class="text-center">Players with 30+ Scores by venue</h1>
@@ -540,7 +540,7 @@ h5 {
       </div>  
       <% } %>
       
-      <% if(h2hData){ %>
+      <% if(h2hData != []){ %>
       <div class="tab-pane fade" id="h2hData-tab-pane" role="tabpanel" aria-labelledby="h2hData-tab">
         <div class="mt-4">
           <h4 class="text-center">Players with 30+ Scores by H2H</h1>
