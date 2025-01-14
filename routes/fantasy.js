@@ -182,7 +182,7 @@ router.post('/postCombination', isAuthenticatedUser,upload.single('image'), (req
         ])
       );
 
-     console.log(match.playerProbability);
+     console.log([...match.team1Probable,...match.team2Probable]);
   
       res.render('fantasyDetails', {
         title: 'Fantasy Discussion',

@@ -59,7 +59,7 @@ const Scorecard = require('./models/scorecard');
 
 
     try {
-        const matchId = "67855094cbced5c1dc10c3c3";
+        const matchId = "67865e55edce6ce1f8fcac35";
         const match = await Match.findById(matchId);
         if (!match || !match.team1Squad || !match.team2Squads) throw new Error('Match data is incomplete.');
     
